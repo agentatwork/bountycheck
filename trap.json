@@ -20,7 +20,7 @@
    "README.md"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "CornelParsch21/client-go": {
   "target": "CornelParsch21/client-go",
@@ -44,7 +44,7 @@
    "issue #1"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "EstefanyLonsway6/traefik": {
   "target": "EstefanyLonsway6/traefik",
@@ -68,7 +68,7 @@
    "issue #1"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "NSPG13/agent-bounties": {
   "target": "NSPG13/agent-bounties",
@@ -110,7 +110,7 @@
    "issue #924"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "Nexussyn/ai-growth-platform": {
   "target": "Nexussyn/ai-growth-platform",
@@ -135,7 +135,7 @@
    "AGENTS.md"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "Pay-Per-Token-LLM-Gateway/pay-per-token-llm-gateway": {
   "target": "Pay-Per-Token-LLM-Gateway/pay-per-token-llm-gateway",
@@ -160,7 +160,7 @@
    "SECURITY.md"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "Scottcjn/rustchain-bounties": {
   "target": "Scottcjn/rustchain-bounties",
@@ -211,7 +211,7 @@
    "issue #16472"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "SecureBananaLabs/bug-bounty": {
   "target": "SecureBananaLabs/bug-bounty",
@@ -261,7 +261,7 @@
    "issue #11740"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "SolFoundry/solfoundry": {
   "target": "SolFoundry/solfoundry",
@@ -308,7 +308,7 @@
    "README.md"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "Vikingr2023/awesome-agent-bounties": {
   "target": "Vikingr2023/awesome-agent-bounties",
@@ -344,7 +344,7 @@
    "issue #369"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "WillSmithTE/qdrant-qdrant": {
   "target": "WillSmithTE/qdrant-qdrant",
@@ -375,7 +375,7 @@
    "issue #387"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "appmeee/ClawFreelance": {
   "target": "appmeee/ClawFreelance",
@@ -415,7 +415,7 @@
    "issue #264"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "bodycount0/soroban-defi-analytics": {
   "target": "bodycount0/soroban-defi-analytics",
@@ -442,7 +442,7 @@
    "issue #2"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "cyrilawoyemi99-max/owockibot-bounty-sync-": {
   "target": "cyrilawoyemi99-max/owockibot-bounty-sync-",
@@ -465,7 +465,7 @@
    "README.md"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "dwebagents/AgentPipe": {
   "target": "dwebagents/AgentPipe",
@@ -492,7 +492,7 @@
    "SECURITY.md"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "fengking-li/group-buying-data-monitor": {
   "target": "fengking-li/group-buying-data-monitor",
@@ -515,7 +515,7 @@
    "README.md"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "go-gitea/gitea": {
   "target": "go-gitea/gitea",
@@ -543,7 +543,7 @@
    "issue #38916"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "gyroflow/gyroflow": {
   "target": "gyroflow/gyroflow",
@@ -569,7 +569,7 @@
    "issue #1194"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "iii123iii/Crystal-PDF": {
   "target": "iii123iii/Crystal-PDF",
@@ -593,7 +593,7 @@
    "CLAUDE.md"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "illbnm/homelab-stack": {
   "target": "illbnm/homelab-stack",
@@ -639,7 +639,7 @@
    "README.md"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "jflournoy/for-funsies": {
   "target": "jflournoy/for-funsies",
@@ -666,7 +666,7 @@
    "issue #41"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "microg/GmsCore": {
   "target": "microg/GmsCore",
@@ -694,7 +694,7 @@
    "issue #3708"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "pablodelazari/bounty-hunter-sandbox": {
   "target": "pablodelazari/bounty-hunter-sandbox",
@@ -715,7 +715,7 @@
   },
   "checked": [],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "rohitdash08/FinMind": {
   "target": "rohitdash08/FinMind",
@@ -762,7 +762,7 @@
    "README.md"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "sourcey/startup-credits": {
   "target": "sourcey/startup-credits",
@@ -790,7 +790,7 @@
    "issue #558"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "thrixel/goal-to-game": {
   "target": "thrixel/goal-to-game",
@@ -814,7 +814,7 @@
    "issue #3"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  },
  "watney-ai/open-source-bounties": {
   "target": "watney-ai/open-source-bounties",
@@ -837,6 +837,6 @@
    "README.md"
   ],
   "api_calls": 15,
-  "version": "1.0.0"
+  "version": "1.2.0"
  }
 }
