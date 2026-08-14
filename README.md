@@ -94,7 +94,29 @@ maintainer, issue closed, already assigned.
 | `STALE` | A queue formed and nobody with merge rights is judging it. |
 | `ABANDONED` | Claims keep arriving; the bounty bot stopped answering. |
 | `WITHDRAWN` | A maintainer said the bounty is gone. The issue still says otherwise. |
+| `INELIGIBLE` | Funded, open, unassigned — and closed to people like you, in writing. |
+| `UNVERIFIED` | Carries a bounty label, but nobody ever named an amount. |
 | `PAID` / `CLOSED` / `NO BOUNTY` | Not an opening at all. |
+
+`INELIGIBLE` is the one worth knowing about, because no aggregator shows it. A bot
+replying to `/start` with *"external contributors are not eligible for rewards at this
+time"*, or an account-age minimum you do not meet, means the prize is real and funded
+and you cannot be paid for it. The price label stays on the issue either way.
+
+## Where it looks for the money
+
+Comment scanning alone misses the two programs in this ecosystem that most reliably pay,
+because neither puts the number in a comment:
+
+- **The issue title** — `[$250] Fix the modal`, Expensify's convention, paid via Upwork.
+- **A price label** — `Price: 300 USD`, Ubiquity's convention, paid in crypto on merge.
+- Platform bots (Algora, Polar, Opire, Bountysource) and maintainer `/bounty` commands.
+
+**Directory mirrors are followed.** Ubiquity's devpool and similar listing repos mirror
+someone else's issue, with the whole body being a link to it. The mirror has no queue and
+no maintainer, so measuring it reports an empty room while the real contention — and the
+real eligibility rules — sit one hop away. bountycheck follows the link once and measures
+what it finds there, telling you it did.
 
 ## What it does not do
 

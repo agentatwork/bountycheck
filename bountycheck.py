@@ -52,6 +52,15 @@ BOUNTY_CMD = re.compile(r"^\s*/bounty\s+\$?\s?([\d,]+(?:\.\d+)?)", re.I | re.M)
 # Somebody staking a claim. Slash commands are the platform-recognised form; the
 # prose variants are what people write on repos with no bot at all.
 CLAIM_CMD = re.compile(r"^\s*[/!](attempt|claim|assign|take)\b", re.I | re.M)
+# `[$250] Fix the modal` - Expensify's convention, and copied widely. Anchored to the
+# start so a dollar figure mentioned inside a title is not mistaken for a prize.
+TITLE_PRICE = re.compile(r"^\s*[\[(]\s*\$\s?([\d,]+(?:\.\d+)?)\s*[\])]")
+# `Price: 300 USD` (Ubiquity), `Bounty: $50`, or a label that is just `$100`.
+LABEL_PRICE = re.compile(r"(?:price|bounty|reward|prize)\W{0,4}\$?\s?([\d,]+(?:\.\d+)?)"
+                         r"|^\$\s?([\d,]+(?:\.\d+)?)\b", re.I)
+# A directory entry whose entire body is a link to the issue it mirrors.
+MIRROR = re.compile(r"^https://github\.com/([\w.-]+)/([\w.-]+)/issues/(\d+)/?$")
+
 CLAIM_PROSE = re.compile(
     r"\b(?:i(?:'|’)?d?\s+(?:like|want|will|can)\s+to\s+(?:work\s+on|take|try|tackle|solve)"
     r"|i(?:'|’)?m\s+(?:working|going\s+to\s+work)\s+on"
@@ -67,6 +76,18 @@ CANCELLED = re.compile(
     r"(?:removed|cancelled|canceled|revoked|withdrawn|expired|closed)"
     r"|(?:removed|cancelling|canceling|dropping)\s+(?:all\s+)?(?:the\s+)?bount(?:y|ies)"
     r"|rewarded\s+to\s+@)", re.I)
+
+# A different thing entirely from a bounty being cancelled: the bounty is real, funded and
+# open, and *you* specifically cannot be paid for it. Ubiquity's bot says this outright
+# while the `Price: 300 USD` label stays on the issue, and account-age gates do the same
+# job more quietly. This is not a race you might lose - it is a door, and it is shut.
+INELIGIBLE = re.compile(
+    r"\b(?:external\s+contributors?\s+are\s+not\s+eligible"
+    r"|not\s+eligible\s+for\s+(?:the\s+)?rewards?"
+    r"|preserving\s+resources\s+for\s+(?:the\s+)?core\s+team"
+    r"|needs?\s+an\s+account\s+at\s+least\s+[\d.]+\s+days?\s+old"
+    r"|only\s+(?:members|maintainers|core\s+team|employees)\s+(?:can|may|are)\s+"
+    r"(?:eligible|claim|be\s+(?:paid|rewarded)))", re.I)
 
 # The bounty was paid out. Algora and Polar both announce this.
 AWARDED = re.compile(r"\b(?:has\s+been\s+awarded|bounty\s+(?:has\s+been\s+)?paid"
@@ -177,6 +198,26 @@ def find_bounty(issue: dict, comments: list) -> dict:
                            posted_at=c["created_at"], source=f"{author} comment")
             break
 
+    # The two programs in this ecosystem that most reliably pay put the number where a
+    # comment scan will never look: Expensify writes it into the title (`[$250] ...`) and
+    # pays out on Upwork, and Ubiquity writes it into a label (`Price: 300 USD`). Missing
+    # these reports the most dependable payers on GitHub as having no bounty at all.
+    if out["amount"] is None:
+        m = TITLE_PRICE.search(issue.get("title") or "")
+        if m:
+            out.update(amount=_money(m.group(1)), platform=out["platform"] or "title",
+                       posted_at=issue.get("created_at"), source="issue title")
+
+    if out["amount"] is None:
+        for lbl in issue.get("labels", []):
+            name = lbl.get("name") or ""
+            m = LABEL_PRICE.search(name)
+            if m:
+                out.update(amount=_money(m.group(1) or m.group(2)),
+                           platform=out["platform"] or "price label",
+                           posted_at=issue.get("created_at"), source=f"label {name!r}")
+                break
+
     # A `💎 Bounty`-style label is weak evidence, but it is evidence when nothing else spoke.
     if out["amount"] is None:
         for lbl in issue.get("labels", []):
@@ -275,6 +316,24 @@ def bot_alive(comments: list, platform: str | None, first_claim: str | None) -> 
     return any(c["created_at"] > first_claim for c in bots)
 
 
+def scan_ineligible(comments: list) -> dict | None:
+    """Somebody with standing said outsiders cannot be paid here.
+
+    Unlike a withdrawal, this is usually said by the bot rather than a human, so bots
+    count - they are the ones enforcing it. Outsiders speculating do not.
+    """
+    for c in reversed(comments):
+        by = c["user"]["login"]
+        if not by.endswith("[bot]") and c.get("author_association") not in MAINTAINER:
+            continue
+        text = c.get("body") or ""
+        m = INELIGIBLE.search(text)
+        if m:
+            return {"at": c["created_at"], "by": by,
+                    "text": " ".join(text[max(0, m.start() - 40):m.end() + 100].split())}
+    return None
+
+
 def scan_cancelled(issue: dict, comments: list) -> dict | None:
     """A maintainer saying the bounty is gone outranks every other signal."""
     for c in comments:
@@ -312,6 +371,10 @@ def decide(f: dict) -> tuple[str, str]:
     if f["cancelled"]:
         return "WITHDRAWN", ("A maintainer said the bounty is gone. The issue still advertises it; "
                              "that is the trap. Do not start.")
+    if f.get("ineligible"):
+        return "INELIGIBLE", (f"@{f['ineligible']['by']} stated that contributors like you cannot "
+                              "be paid here. The prize is real, funded, and closed to you. The "
+                              "price label is still on the issue.")
     if f["issue_state"] == "closed":
         return "CLOSED", "The issue is closed. Whatever it once paid, it is not paying now."
     if f["bounty"]["amount"] is None and f["bounty"]["platform"] is None:
@@ -359,12 +422,25 @@ def decide(f: dict) -> tuple[str, str]:
     return "OPEN", "No queue, bounty present, and the thread is being read. This is the real kind."
 
 
-def analyse(owner: str, name: str, num: int, gh: GH) -> dict:
+def analyse(owner: str, name: str, num: int, gh: GH, _via: str | None = None) -> dict:
     issue = gh.issue(owner, name, num)
     if not issue:
         raise SystemExit(f"bountycheck: {owner}/{name}#{num} not found (or not public)")
     if issue.get("pull_request"):
         raise SystemExit(f"bountycheck: {owner}/{name}#{num} is a pull request, not an issue")
+
+    # Bounty directories (Ubiquity's devpool is the big one) mirror somebody else's issue
+    # and the whole body is a link to it. The mirror has no claimants and no maintainer,
+    # so measuring it reports an empty room while the real queue - and the real
+    # eligibility rules - are one hop away. Follow the link once and measure that.
+    if _via is None:
+        m = MIRROR.match((issue.get("body") or "").strip())
+        if m:
+            up = analyse(m.group(1), m.group(2), int(m.group(3)), gh,
+                         _via=f"{owner}/{name}#{num}")
+            up["mirror_of"] = up["target"]              # where the work actually happens
+            up["target"] = f"{owner}/{name}#{num}"      # what you asked about
+            return up
 
     comments = gh.comments(owner, name, num)
     timeline = gh.timeline(owner, name, num)
@@ -392,6 +468,7 @@ def analyse(owner: str, name: str, num: int, gh: GH) -> dict:
         "maintainer": maint,
         "bot_alive": bot_alive(comments, bounty["platform"], first_claim),
         "cancelled": scan_cancelled(issue, comments),
+        "ineligible": scan_ineligible(comments),
         "awarded": scan_awarded(comments),
         "comment_count": len(comments),
         "api_calls": gh.calls,
@@ -420,7 +497,7 @@ RESET = "\033[0m"
 
 # Exit codes, so this can gate a script: 0 go, 1 think hard, 2 do not start.
 EXIT = {"OPEN": 0, "TAKEN": 1, "CONTESTED": 1, "ASSIGNED": 1, "STALE": 2, "ABANDONED": 2,
-        "WITHDRAWN": 2, "PAID": 2, "CLOSED": 2, "NO BOUNTY": 2, "UNVERIFIED": 1}
+        "WITHDRAWN": 2, "PAID": 2, "CLOSED": 2, "NO BOUNTY": 2, "UNVERIFIED": 1, "INELIGIBLE": 2}
 
 
 def render(f: dict, use_color: bool = True) -> str:
@@ -458,12 +535,18 @@ def render(f: dict, use_color: bool = True) -> str:
 
     if f["per_contender"] is not None:
         out.append("  What it is worth")
-        out.append(f"    ${b['amount']:,.0f} split {f['contenders']} ways = "
+        out.append(f"    ${b['amount']:,.0f} split {f['contenders']} "
+                   f"{_plural(f['contenders'], 'way')} = "
                    f"${f['per_contender']:,.2f} per contender"
                    + (f", and {f['rivals_merged']} of {len(f['rivals'])} competing PRs have merged"
                       if f["rivals"] else ""))
 
-    for key, label in (("cancelled", "Withdrawn"), ("awarded", "Awarded")):
+    if f.get("mirror_of"):
+        out.append("  Mirror")
+        out.append(f"    This is a directory entry. Measured the issue it points at, "
+                   f"{f['mirror_of']}.")
+    for key, label in (("cancelled", "Withdrawn"), ("awarded", "Awarded"),
+                       ("ineligible", "Ineligible")):
         if f[key]:
             out.append(f"  {label}")
             out.append(f"    {f[key]['at'][:10]}: \"{f[key]['text'][:160]}\"")

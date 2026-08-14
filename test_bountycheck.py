@@ -81,6 +81,32 @@ check("label alone has no amount", f["bounty"]["amount"], None)
 f = run(issue(), [])
 check("no bounty at all", f["verdict"], "NO BOUNTY")
 
+# Expensify's real format: the money is in the title and paid out on Upwork, so a scan
+# that only reads comments calls the ecosystem's most dependable payer a non-bounty.
+f = run(issue(title="[$250] Where's your bank modal is missing",
+              labels=[{"name": "External"}, {"name": "Weekly"}]),
+        [comment("melvin-bot[bot]", "Job added to Upwork: https://www.upwork.com/jobs/~02208", 20)])
+check("amount in title", f["bounty"]["amount"], 250.0)
+check("title is a source", f["bounty"]["platform"], "title")
+f = run(issue(title="Crash when the balance exceeds $250 in the ledger"), [])
+check("a dollar figure mid-title is not a prize", f["bounty"]["amount"], None)
+
+# Ubiquity's real format: the money is in a label.
+f = run(issue(title="Check dev experience on starting an issue",
+              labels=[{"name": "Time: <1 Day"}, {"name": "Priority: 1 (Normal)"},
+                      {"name": "Price: 300 USD"}]), [])
+check("amount in label", f["bounty"]["amount"], 300.0)
+check("price label is a source", f["bounty"]["platform"], "price label")
+f = run(issue(labels=[{"name": "Priority: 1 (Normal)"}, {"name": "Time: <1 Day"}]), [])
+check("priority is not a price", f["bounty"]["amount"], None)
+f = run(issue(labels=[{"name": "$100"}]), [])
+check("bare dollar label", f["bounty"]["amount"], 100.0)
+
+# A named amount, wherever it came from, outranks the bare-label guess.
+f = run(issue(title="[$50] thing", labels=[{"name": "💎 Bounty"}]), [])
+check("named amount beats label-only", (f["bounty"]["amount"], f["verdict"] == "UNVERIFIED"),
+      (50.0, False))
+
 # --------------------------------------------------------------------------------------
 print("claimant counting")
 cs = [comment("algora-pbc[bot]", ALGORA, 300),
@@ -153,6 +179,28 @@ f = run(issue(), [comment("algora-pbc[bot]", ALGORA, 300),
                   comment("alice", "/attempt #1", 200),
                   comment("algora-pbc[bot]", "🎉 @alice has been awarded $20", 100)])
 check("payout outranks contention", f["verdict"], "PAID")
+
+# --------------------------------------------------------------------------------------
+print("eligibility")
+# Ubiquity's bot, verbatim, still posting this in August 2026 while the `Price: 300 USD`
+# label stays on the issue. The bounty is real and funded; outsiders just cannot be paid.
+UBQ = ("> [!WARNING]\n> External contributors are not eligible for rewards at this time. "
+       "We are preserving resources for core team only.")
+f = run(issue(created_at=ago(30), labels=[{"name": "Price: 300 USD"}]),
+        [comment("ceodaradigu", "/start", 6), comment("ubiquity-os-beta[bot]", UBQ, 6)])
+check("bot-stated ineligibility", f["verdict"], "INELIGIBLE")
+check("ineligible still reads the price", f["bounty"]["amount"], 300.0)
+check("ineligible is do-not-start", bc.EXIT[f["verdict"]], 2)
+
+AGE = "> [!WARNING]\n> @someone needs an account at least 365.25 days old (currently 83 days)."
+f = run(issue(created_at=ago(30), labels=[{"name": "Price: 75 USD"}]),
+        [comment("ubiquity-os[bot]", AGE, 5)])
+check("account-age gate", f["verdict"], "INELIGIBLE")
+
+# An outsider guessing about the rules is not the same as the bot enforcing them.
+f = run(issue(created_at=ago(30), labels=[{"name": "Price: 75 USD"}]),
+        [comment("randomguy", "I think external contributors are not eligible for rewards", 5)])
+check("outsider cannot declare you ineligible", f["verdict"] == "INELIGIBLE", False)
 
 # --------------------------------------------------------------------------------------
 print("verdicts")
