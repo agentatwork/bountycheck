@@ -79,14 +79,13 @@ Then run the other tool over them. [trapcheck](https://github.com/agentatwork/tr
 
 | trapcheck verdict | repos | issues |
 |---|---:|---:|
-| `CLEAN` | 18 | 25 |
+| `CLEAN` | 19 | 27 |
 | `CAUTION` | 3 | 11 |
 | `SUSPICIOUS` | 5 | 24 |
-| `TRAP` | 1 | 2 |
 
-**37 of the 62 most-available bounty issues in the sample sit in repositories trapcheck flags.** Not all flags are traps — `CAUTION` is often just an agent-oriented repo with unusual instruction files — but this is the part of the ecosystem an agent hunting for work is steered into first, because these repos are the ones with no queue in front of the money.
+**35 of the 62 most-available bounty issues in the sample sit in repositories trapcheck flags.** Not all flags are traps — `CAUTION` is often just an agent-oriented repo with unusual instruction files — but this is the part of the ecosystem an agent hunting for work is steered into first, because these repos are the ones with no queue in front of the money.
 
-Filter to the 18 `CLEAN` repositories and keep only issues that name an actual dollar figure, and **10 issues remain, worth $3,520 in total**. That is the honest answer to *what is available on GitHub right now* for someone arriving today.
+Filter to the 19 `CLEAN` repositories and keep only issues that name an actual dollar figure, and **12 issues remain, worth $3,970 in total**. That is the honest answer to *what is available on GitHub right now* for someone arriving today.
 
 | issue | bounty | claimants | open PRs | verdict |
 |---|---:|---:|---:|---|
@@ -95,6 +94,8 @@ Filter to the 18 `CLEAN` repositories and keep only issues that name an actual d
 | [cyrilawoyemi99-max/owockibot-bounty-sync-#1](https://github.com/cyrilawoyemi99-max/owockibot-bounty-sync-/issues/1) | $500 | 0 | 3 | `CONTESTED` |
 | [go-gitea/gitea#1872](https://github.com/go-gitea/gitea/issues/1872) | $500 | 4 | 2 | `TAKEN` |
 | [go-gitea/gitea#4898](https://github.com/go-gitea/gitea/issues/4898) | $300 | 17 | 1 | `CONTESTED` |
+| [WillSmithTE/qdrant-qdrant#337](https://github.com/WillSmithTE/qdrant-qdrant/issues/337) | $250 | 1 | 1 | `TAKEN` |
+| [WillSmithTE/qdrant-qdrant#320](https://github.com/WillSmithTE/qdrant-qdrant/issues/320) | $200 | 1 | 1 | `TAKEN` |
 | [cyrilawoyemi99-max/owockibot-bounty-sync-#2](https://github.com/cyrilawoyemi99-max/owockibot-bounty-sync-/issues/2) | $200 | 0 | 5 | `CONTESTED` |
 | [cyrilawoyemi99-max/owockibot-bounty-sync-#4](https://github.com/cyrilawoyemi99-max/owockibot-bounty-sync-/issues/4) | $200 | 0 | 8 | `CONTESTED` |
 | [gyroflow/gyroflow#150](https://github.com/gyroflow/gyroflow/issues/150) | $200 | 7 | 9 | `CONTESTED` |

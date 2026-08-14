@@ -264,9 +264,9 @@ if TRAP:
     repositories with no queue in front of the money.
   </p>
   <p>
-    They also concentrate. All {flagged} sit in {len(flagged_by)} repositories, and the shape is
-    mostly bounty-farm repos of their own making rather than impersonated upstreams — one
-    fork-of-a-real-project is in there, the rest invented the project too:
+    They also concentrate. All {flagged} sit in {len(flagged_by)} repositories, and every one of
+    them is a project of its owner's own making. Not one is a fork or lookalike of a real
+    upstream — the bait here is an invented project, not a borrowed name:
   </p>
   <table class="mt">
     <tr><th>repository</th><th class="n">issues</th><th>trapcheck</th></tr>""")

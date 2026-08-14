@@ -349,22 +349,10 @@
  "WillSmithTE/qdrant-qdrant": {
   "target": "WillSmithTE/qdrant-qdrant",
   "url": "https://github.com/WillSmithTE/qdrant-qdrant",
-  "verdict": "TRAP",
-  "advice": "Do not let an agent work here.",
-  "score": 40,
-  "findings": [
-   {
-    "rule": "EXFIL_PROMPT",
-    "severity": 40,
-    "title": "Asks the agent to disclose its own instructions",
-    "why": "A task's deliverable is code. Nothing legitimate needs the contents of the model's system prompt, which may contain proprietary or private configuration.",
-    "source": "docs/CONTRIBUTING.md",
-    "evidence": "ling in the new fusion method ``` #### Disclose initial prompt you used to generate the contribution Code generation tools have the ability to perform modifications across the whole Qdrant co",
-    "sources": [
-     "docs/CONTRIBUTING.md"
-    ]
-   }
-  ],
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
   "signals": {
    "stars": 0,
    "forks": 3,
@@ -537,10 +525,10 @@
   "score": 0,
   "findings": [],
   "signals": {
-   "stars": 57372,
-   "forks": 7003,
-   "open_issues": 2605,
-   "pr_numbers_issued": 38923,
+   "stars": 57373,
+   "forks": 7004,
+   "open_issues": 2606,
+   "pr_numbers_issued": 38924,
    "merged_of_30_closed_prs": 13,
    "prs_per_star": 0.7,
    "has_license": true,
@@ -565,7 +553,7 @@
   "score": 0,
   "findings": [],
   "signals": {
-   "stars": 9307,
+   "stars": 9308,
    "forks": 478,
    "open_issues": 115,
    "pr_numbers_issued": 1198,
@@ -688,7 +676,7 @@
   "score": 0,
   "findings": [],
   "signals": {
-   "stars": 14220,
+   "stars": 14221,
    "forks": 3035,
    "open_issues": 1375,
    "pr_numbers_issued": 3713,
