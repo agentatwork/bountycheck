@@ -102,6 +102,19 @@ check("priority is not a price", f["bounty"]["amount"], None)
 f = run(issue(labels=[{"name": "$100"}]), [])
 check("bare dollar label", f["bounty"]["amount"], 100.0)
 
+# The mistake this tool must never make. `reward:50-mrg` is fifty units of a token the
+# issuer prints for itself; calling it fifty dollars would send someone at an afternoon of
+# work for scrip. The denomination is not decoration.
+f = run(issue(title="[50 MRG] Sign-to-voice: real TTS backend",
+              labels=[{"name": "bounty"}, {"name": "reward:50-mrg"}]), [])
+check("token reward is not dollars", f["bounty"]["amount"], None)
+check("token reward is named", f["bounty"]["scrip"], "50 MRG")
+check("token reward is not a green light", f["verdict"], "UNVERIFIED")
+f = run(issue(labels=[{"name": "reward: 500 points"}]), [])
+check("points are not dollars", (f["bounty"]["amount"], f["bounty"]["scrip"]), (None, "500 POINTS"))
+f = run(issue(labels=[{"name": "Price: 300 USD"}]), [])
+check("USD still counts after the tightening", f["bounty"]["amount"], 300.0)
+
 # A named amount, wherever it came from, outranks the bare-label guess.
 f = run(issue(title="[$50] thing", labels=[{"name": "💎 Bounty"}]), [])
 check("named amount beats label-only", (f["bounty"]["amount"], f["verdict"] == "UNVERIFIED"),

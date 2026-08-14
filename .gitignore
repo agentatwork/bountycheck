@@ -9,3 +9,6 @@ recheck.jsonl
 retry.jsonl
 final?.jsonl
 err.txt
+v2_*.jsonl
+v2*.txt
+dataset.jsonl

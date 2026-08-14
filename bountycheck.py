@@ -55,9 +55,19 @@ CLAIM_CMD = re.compile(r"^\s*[/!](attempt|claim|assign|take)\b", re.I | re.M)
 # `[$250] Fix the modal` - Expensify's convention, and copied widely. Anchored to the
 # start so a dollar figure mentioned inside a title is not mistaken for a prize.
 TITLE_PRICE = re.compile(r"^\s*[\[(]\s*\$\s?([\d,]+(?:\.\d+)?)\s*[\])]")
-# `Price: 300 USD` (Ubiquity), `Bounty: $50`, or a label that is just `$100`.
-LABEL_PRICE = re.compile(r"(?:price|bounty|reward|prize)\W{0,4}\$?\s?([\d,]+(?:\.\d+)?)"
-                         r"|^\$\s?([\d,]+(?:\.\d+)?)\b", re.I)
+# `Price: 300 USD` (Ubiquity), `Bounty: $50`, or a label that is just `$100`. The
+# denomination is not optional: `reward:50-mrg` is fifty units of a token the issuer mints
+# for itself, and reporting that as fifty dollars would be the worst mistake this tool
+# could make. If it does not say dollars, it does not count as dollars.
+LABEL_PRICE = re.compile(
+    r"(?:price|bounty|reward|prize)\W{0,4}\$\s?([\d,]+(?:\.\d+)?)"
+    r"|(?:price|bounty|reward|prize)\W{0,4}([\d,]+(?:\.\d+)?)\s*(?:usdc?|usdt|dollars?)\b"
+    r"|^\$\s?([\d,]+(?:\.\d+)?)$", re.I)
+
+# A prize denominated in something the issuer prints. Points, credits, or a ticker nobody
+# quotes. It may be worth something one day; it is not money today.
+SCRIP = re.compile(r"\b(\d[\d,]*)\s*[-\s]?((?!USD|USDC|USDT|EUR|GBP)[A-Z]{2,6})\b"
+                   r"|\b(\d[\d,]*)\s*(points?|credits?|tokens?|stars?)\b", re.I)
 # A directory entry whose entire body is a link to the issue it mirrors.
 MIRROR = re.compile(r"^https://github\.com/([\w.-]+)/([\w.-]+)/issues/(\d+)/?$")
 
@@ -169,7 +179,7 @@ class GH:
 # --------------------------------------------------------------------------------------
 def find_bounty(issue: dict, comments: list) -> dict:
     """Amount and platform, from whichever of the three places announced it."""
-    out = {"amount": None, "platform": None, "posted_at": None, "source": None}
+    out = {"amount": None, "platform": None, "posted_at": None, "source": None, "scrip": None}
 
     body = issue.get("body") or ""
     for name, who, amt in PLATFORMS:
@@ -213,9 +223,19 @@ def find_bounty(issue: dict, comments: list) -> dict:
             name = lbl.get("name") or ""
             m = LABEL_PRICE.search(name)
             if m:
-                out.update(amount=_money(m.group(1) or m.group(2)),
+                out.update(amount=_money(m.group(1) or m.group(2) or m.group(3)),
                            platform=out["platform"] or "price label",
                            posted_at=issue.get("created_at"), source=f"label {name!r}")
+                break
+
+    if out["amount"] is None:
+        for text in [issue.get("title") or ""] + [l.get("name") or "" for l in issue.get("labels", [])]:
+            m = SCRIP.search(text)
+            if m:
+                unit = m.group(2) or m.group(4)
+                out.update(platform=out["platform"] or "scrip",
+                           scrip=f"{m.group(1) or m.group(3)} {unit.upper()}",
+                           source=f"{text.strip()!r}")
                 break
 
     # A `💎 Bounty`-style label is weak evidence, but it is evidence when nothing else spoke.
@@ -379,6 +399,10 @@ def decide(f: dict) -> tuple[str, str]:
         return "CLOSED", "The issue is closed. Whatever it once paid, it is not paying now."
     if f["bounty"]["amount"] is None and f["bounty"]["platform"] is None:
         return "NO BOUNTY", "No bounty found on this issue. Whatever sent you here was not the issue itself."
+    if f["bounty"].get("scrip"):
+        return "UNVERIFIED", (f"The prize is {f['bounty']['scrip']} - a unit the issuer mints, not "
+                              "money. It may be worth something one day. Price it yourself before "
+                              "you spend an afternoon on it.")
     if f["assignee"]:
         return "ASSIGNED", f"Assigned to @{f['assignee']}. It is theirs until they give it back."
     if f["bot_alive"] is False:
@@ -413,7 +437,7 @@ def decide(f: dict) -> tuple[str, str]:
     # empty queue on an issue like this is not an opportunity, it is an absence of
     # evidence, and reporting it as OPEN would be the exact mistake this tool exists to
     # prevent. Repos that mint hundreds of these are the ones worth being slowest about.
-    if f["bounty"]["amount"] is None and f["bounty"]["platform"] == "label only":
+    if f["bounty"]["amount"] is None and f["bounty"]["platform"] in ("label only", "scrip"):
         return "UNVERIFIED", ("Labelled as a bounty, but nobody has named an amount and no bounty "
                               "platform is involved. There may be no money here at all.")
 
