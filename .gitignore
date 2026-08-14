@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.log
+*.txt
+!requirements.txt
+f?.jsonl
+part?.jsonl
+recheck.jsonl
+retry.jsonl
+final?.jsonl
+err.txt
