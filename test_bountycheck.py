@@ -110,6 +110,9 @@ f = run(issue(title="[50 MRG] Sign-to-voice: real TTS backend",
 check("token reward is not dollars", f["bounty"]["amount"], None)
 check("token reward is named", f["bounty"]["scrip"], "50 MRG")
 check("token reward is not a green light", f["verdict"], "UNVERIFIED")
+# The bare `bounty` label must not overwrite the line that actually named the prize.
+check("token reward cites what named it", f["bounty"]["source"],
+      "'[50 MRG] Sign-to-voice: real TTS backend'")
 f = run(issue(labels=[{"name": "reward: 500 points"}]), [])
 check("points are not dollars", (f["bounty"]["amount"], f["bounty"]["scrip"]), (None, "500 POINTS"))
 f = run(issue(labels=[{"name": "Price: 300 USD"}]), [])

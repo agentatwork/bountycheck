@@ -135,11 +135,25 @@ class GH:
                 with urllib.request.urlopen(req, timeout=30) as r:
                     return json.loads(r.read())
             except urllib.error.HTTPError as e:
-                if e.code in (403, 429) and attempt < 2:
-                    time.sleep(2 + attempt * 3)
-                    continue
                 if e.code == 404:
                     return None
+                if e.code in (403, 429):
+                    # Two different 403s wear the same status code. The primary limit is
+                    # out of budget until a fixed clock time and no amount of waiting in
+                    # this loop helps; say so and let the caller decide. The secondary
+                    # limit is "you are asking too fast" and clears in about a minute -
+                    # /rate_limit will happily report thousands remaining while it bites.
+                    if e.headers.get("x-ratelimit-remaining") == "0":
+                        reset = int(e.headers.get("x-ratelimit-reset") or 0)
+                        why = "" if self.token else (
+                            " - no GITHUB_TOKEN in the environment, so this ran on the "
+                            "60 requests/hour anonymous budget")
+                        raise SystemExit(f"github rate limit exhausted{why}; resets in "
+                                         f"{max(0, reset - int(time.time()))}s")
+                    if attempt < 2:
+                        wait = int(e.headers.get("retry-after") or 0) or 60 * (attempt + 1)
+                        time.sleep(min(wait, 120))
+                        continue
                 raise
             except (urllib.error.URLError, TimeoutError):
                 if attempt < 2:
@@ -239,7 +253,9 @@ def find_bounty(issue: dict, comments: list) -> dict:
                 break
 
     # A `💎 Bounty`-style label is weak evidence, but it is evidence when nothing else spoke.
-    if out["amount"] is None:
+    # It must not overwrite a source that did speak: an issue tagged both `bounty` and
+    # `reward:50-mrg` should cite the line that named the prize, not the tag that did not.
+    if out["amount"] is None and out["source"] is None:
         for lbl in issue.get("labels", []):
             if "bounty" in (lbl.get("name") or "").lower():
                 out.update(platform=out["platform"] or "label only", source=f"label {lbl['name']!r}")
