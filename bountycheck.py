@@ -321,9 +321,20 @@ def decide(f: dict) -> tuple[str, str]:
     if f["bot_alive"] is False:
         return "ABANDONED", ("Claims keep arriving and the bounty bot stopped answering them. The "
                              "integration is dead while the issue still advertises the prize.")
+    # An empty queue is not evidence of opportunity when the thread has been silent for
+    # years. Old platform bounties in particular sit there unclaimed and unreachable -
+    # nobody queued because there is nobody home, which is the opposite of an opening.
+    if silent_days is not None and silent_days > 365:
+        return "STALE", (f"No maintainer has spoken here in {silent_days} days"
+                         + (f", with {claimants} already queued." if claimants else
+                            ". Nobody queued because there is nobody home."))
     if silent_days is not None and silent_days > 180 and claimants >= 3:
         return "STALE", (f"A queue of {claimants} formed and no maintainer has spoken in "
                          f"{silent_days} days. Nobody is judging this.")
+    # Nobody with merge rights ever spoke, and the issue has had years to attract one.
+    if f["maintainer"]["comments"] == 0 and (_days(f["created_at"]) or 0) > 365:
+        return "STALE", ("Nobody with merge rights has ever commented, and the issue is "
+                         f"{_days(f['created_at'])} days old.")
     # Plenty of bounties are posted from a platform dashboard, so the maintainer never
     # comments and never needs to. That is only damning once the queue has aged without
     # anyone showing up to judge it.

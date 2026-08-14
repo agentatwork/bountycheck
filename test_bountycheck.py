@@ -199,6 +199,18 @@ f = run(issue(created_at=ago(900)), stale)
 check("live bot but silent maintainers", f["verdict"], "STALE")
 
 # --------------------------------------------------------------------------------------
+
+# A bounty nobody ever claimed, on a thread nobody has touched in years, is not an
+# opening - it is a fossil. Old platform bounties (Bountysource and friends) sit in
+# exactly this state, and calling them OPEN sends people at unreachable money.
+f = run(issue(created_at=ago(3800)),
+        [comment("bountysource[bot]", "$15 bounty on this issue", 3799),
+         comment("maint", "thanks", 3799, "MEMBER")])
+check("decade-old silence, no queue", f["verdict"], "STALE")
+f = run(issue(created_at=ago(3800)),
+        [comment("bountysource[bot]", "$15 bounty on this issue", 3799)])
+check("no maintainer ever, ancient issue", f["verdict"], "STALE")
+
 print("arithmetic")
 cs = [comment("algora-pbc[bot]", ALGORA, 300)] + \
      [comment(f"u{i}", "/attempt #1", 200 - i) for i in range(4)]
