@@ -10,5 +10,6 @@ retry.jsonl
 final?.jsonl
 err.txt
 v2_*.jsonl
+v3_*.jsonl
+fix*.jsonl
 v2*.txt
-dataset.jsonl

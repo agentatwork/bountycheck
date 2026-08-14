@@ -1,0 +1,854 @@
+{
+ "BAWES-Universe/studenthub": {
+  "target": "BAWES-Universe/studenthub",
+  "url": "https://github.com/BAWES-Universe/studenthub",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 1,
+   "forks": 30,
+   "open_issues": 38,
+   "pr_numbers_issued": 106,
+   "merged_of_30_closed_prs": 24,
+   "prs_per_star": 106.0,
+   "has_license": true,
+   "created": "2017-01-26"
+  },
+  "checked": [
+   "README.md"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "CornelParsch21/client-go": {
+  "target": "CornelParsch21/client-go",
+  "url": "https://github.com/CornelParsch21/client-go",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 0,
+   "forks": 3,
+   "open_issues": 4,
+   "pr_numbers_issued": 8,
+   "merged_of_3_closed_prs": 2,
+   "prs_per_star": 8,
+   "has_license": false,
+   "created": "2026-08-11"
+  },
+  "checked": [
+   "README.md",
+   "issue #1"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "EstefanyLonsway6/traefik": {
+  "target": "EstefanyLonsway6/traefik",
+  "url": "https://github.com/EstefanyLonsway6/traefik",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 0,
+   "forks": 3,
+   "open_issues": 3,
+   "pr_numbers_issued": 5,
+   "merged_of_1_closed_prs": 1,
+   "prs_per_star": 5,
+   "has_license": false,
+   "created": "2026-08-12"
+  },
+  "checked": [
+   "README.md",
+   "issue #1"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "NSPG13/agent-bounties": {
+  "target": "NSPG13/agent-bounties",
+  "url": "https://github.com/NSPG13/agent-bounties",
+  "verdict": "CAUTION",
+  "advice": "Minor signals. Probably fine; skim the evidence.",
+  "score": 15,
+  "findings": [
+   {
+    "rule": "VOLUME_NO_RECEPTION",
+    "severity": 15,
+    "title": "Huge PR volume, almost no audience",
+    "why": "948 PR numbers issued against 9 stars (105.3:1). Real projects attract readers roughly in proportion to contributors.",
+    "source": "repo metadata",
+    "sources": [
+     "repo metadata"
+    ],
+    "evidence": "948 PRs / 9 stars / 22 of last 30 merged"
+   }
+  ],
+  "signals": {
+   "stars": 9,
+   "forks": 62,
+   "open_issues": 186,
+   "pr_numbers_issued": 948,
+   "merged_of_30_closed_prs": 22,
+   "prs_per_star": 105.3,
+   "has_license": true,
+   "created": "2026-07-08"
+  },
+  "checked": [
+   "CONTRIBUTING.md",
+   "README.md",
+   "AGENTS.md",
+   "SECURITY.md",
+   "issue #939",
+   "issue #931",
+   "issue #927",
+   "issue #924"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "Nexussyn/ai-growth-platform": {
+  "target": "Nexussyn/ai-growth-platform",
+  "url": "https://github.com/Nexussyn/ai-growth-platform",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 1,
+   "forks": 22,
+   "open_issues": 20,
+   "pr_numbers_issued": 26,
+   "merged_of_5_closed_prs": 2,
+   "prs_per_star": 26.0,
+   "has_license": true,
+   "created": "2026-06-08"
+  },
+  "checked": [
+   "CONTRIBUTING.md",
+   "README.md",
+   "AGENTS.md"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "Pay-Per-Token-LLM-Gateway/pay-per-token-llm-gateway": {
+  "target": "Pay-Per-Token-LLM-Gateway/pay-per-token-llm-gateway",
+  "url": "https://github.com/Pay-Per-Token-LLM-Gateway/pay-per-token-llm-gateway",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 1,
+   "forks": 21,
+   "open_issues": 56,
+   "pr_numbers_issued": 94,
+   "merged_of_15_closed_prs": 3,
+   "prs_per_star": 94.0,
+   "has_license": true,
+   "created": "2026-08-07"
+  },
+  "checked": [
+   "CONTRIBUTING.md",
+   "README.md",
+   "SECURITY.md"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "Scottcjn/rustchain-bounties": {
+  "target": "Scottcjn/rustchain-bounties",
+  "url": "https://github.com/Scottcjn/rustchain-bounties",
+  "verdict": "SUSPICIOUS",
+  "advice": "Review by hand before letting an agent work here.",
+  "score": 30,
+  "findings": [
+   {
+    "rule": "VOLUME_NO_RECEPTION",
+    "severity": 15,
+    "title": "Huge PR volume, almost no audience",
+    "why": "16,479 PR numbers issued against 251 stars (65.7:1). Real projects attract readers roughly in proportion to contributors.",
+    "source": "repo metadata",
+    "sources": [
+     "repo metadata"
+    ],
+    "evidence": "16,479 PRs / 251 stars / 0 of last 30 merged"
+   },
+   {
+    "rule": "NOTHING_EVER_MERGES",
+    "severity": 15,
+    "title": "No recently-closed pull request was merged",
+    "why": "If payment depends on a merge that never happens, the bounty cannot pay out.",
+    "source": "repo metadata",
+    "sources": [
+     "repo metadata"
+    ],
+    "evidence": "0 of the last 30 closed pull requests were merged (all closed unmerged)"
+   }
+  ],
+  "signals": {
+   "stars": 251,
+   "forks": 364,
+   "open_issues": 1260,
+   "pr_numbers_issued": 16479,
+   "merged_of_30_closed_prs": 0,
+   "prs_per_star": 65.7,
+   "has_license": true,
+   "created": "2026-02-02"
+  },
+  "checked": [
+   "CONTRIBUTING.md",
+   "README.md",
+   ".github/copilot-instructions.md",
+   "SECURITY.md",
+   "issue #16477",
+   "issue #16472"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "SecureBananaLabs/bug-bounty": {
+  "target": "SecureBananaLabs/bug-bounty",
+  "url": "https://github.com/SecureBananaLabs/bug-bounty",
+  "verdict": "SUSPICIOUS",
+  "advice": "Review by hand before letting an agent work here.",
+  "score": 30,
+  "findings": [
+   {
+    "rule": "VOLUME_NO_RECEPTION",
+    "severity": 15,
+    "title": "Huge PR volume, almost no audience",
+    "why": "11,746 PR numbers issued against 265 stars (44.3:1). Real projects attract readers roughly in proportion to contributors.",
+    "source": "repo metadata",
+    "sources": [
+     "repo metadata"
+    ],
+    "evidence": "11,746 PRs / 265 stars / 0 of last 30 merged"
+   },
+   {
+    "rule": "NOTHING_EVER_MERGES",
+    "severity": 15,
+    "title": "No recently-closed pull request was merged",
+    "why": "If payment depends on a merge that never happens, the bounty cannot pay out.",
+    "source": "repo metadata",
+    "sources": [
+     "repo metadata"
+    ],
+    "evidence": "0 of the last 30 closed pull requests were merged (all closed unmerged)"
+   }
+  ],
+  "signals": {
+   "stars": 265,
+   "forks": 848,
+   "open_issues": 8588,
+   "pr_numbers_issued": 11746,
+   "merged_of_30_closed_prs": 0,
+   "prs_per_star": 44.3,
+   "has_license": false,
+   "created": "2026-05-16"
+  },
+  "checked": [
+   "CONTRIBUTING.md",
+   "README.md",
+   "issue #11745",
+   "issue #11743",
+   "issue #11740"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "SolFoundry/solfoundry": {
+  "target": "SolFoundry/solfoundry",
+  "url": "https://github.com/SolFoundry/solfoundry",
+  "verdict": "SUSPICIOUS",
+  "advice": "Review by hand before letting an agent work here.",
+  "score": 30,
+  "findings": [
+   {
+    "rule": "VOLUME_NO_RECEPTION",
+    "severity": 15,
+    "title": "Huge PR volume, almost no audience",
+    "why": "1,461 PR numbers issued against 31 stars (47.1:1). Real projects attract readers roughly in proportion to contributors.",
+    "source": "repo metadata",
+    "sources": [
+     "repo metadata"
+    ],
+    "evidence": "1,461 PRs / 31 stars / 0 of last 30 merged"
+   },
+   {
+    "rule": "NOTHING_EVER_MERGES",
+    "severity": 15,
+    "title": "No recently-closed pull request was merged",
+    "why": "If payment depends on a merge that never happens, the bounty cannot pay out.",
+    "source": "repo metadata",
+    "sources": [
+     "repo metadata"
+    ],
+    "evidence": "0 of the last 30 closed pull requests were merged (all closed unmerged)"
+   }
+  ],
+  "signals": {
+   "stars": 31,
+   "forks": 164,
+   "open_issues": 478,
+   "pr_numbers_issued": 1461,
+   "merged_of_30_closed_prs": 0,
+   "prs_per_star": 47.1,
+   "has_license": false,
+   "created": "2026-03-19"
+  },
+  "checked": [
+   "CONTRIBUTING.md",
+   "README.md"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "Vikingr2023/awesome-agent-bounties": {
+  "target": "Vikingr2023/awesome-agent-bounties",
+  "url": "https://github.com/Vikingr2023/awesome-agent-bounties",
+  "verdict": "CAUTION",
+  "advice": "Minor signals. Probably fine; skim the evidence.",
+  "score": 15,
+  "findings": [
+   {
+    "rule": "VOLUME_NO_RECEPTION",
+    "severity": 15,
+    "title": "Huge PR volume, almost no audience",
+    "why": "379 PR numbers issued against 3 stars (126.3:1). Real projects attract readers roughly in proportion to contributors.",
+    "source": "repo metadata",
+    "sources": [
+     "repo metadata"
+    ],
+    "evidence": "379 PRs / 3 stars / 0 of last 11 merged"
+   }
+  ],
+  "signals": {
+   "stars": 3,
+   "forks": 13,
+   "open_issues": 302,
+   "pr_numbers_issued": 379,
+   "merged_of_11_closed_prs": 0,
+   "prs_per_star": 126.3,
+   "has_license": false,
+   "created": "2026-07-12"
+  },
+  "checked": [
+   "README.md",
+   "issue #369"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "WillSmithTE/qdrant-qdrant": {
+  "target": "WillSmithTE/qdrant-qdrant",
+  "url": "https://github.com/WillSmithTE/qdrant-qdrant",
+  "verdict": "TRAP",
+  "advice": "Do not let an agent work here.",
+  "score": 40,
+  "findings": [
+   {
+    "rule": "EXFIL_PROMPT",
+    "severity": 40,
+    "title": "Asks the agent to disclose its own instructions",
+    "why": "A task's deliverable is code. Nothing legitimate needs the contents of the model's system prompt, which may contain proprietary or private configuration.",
+    "source": "docs/CONTRIBUTING.md",
+    "evidence": "ling in the new fusion method ``` #### Disclose initial prompt you used to generate the contribution Code generation tools have the ability to perform modifications across the whole Qdrant co",
+    "sources": [
+     "docs/CONTRIBUTING.md"
+    ]
+   }
+  ],
+  "signals": {
+   "stars": 0,
+   "forks": 3,
+   "open_issues": 393,
+   "pr_numbers_issued": 394,
+   "merged_of_1_closed_prs": 0,
+   "prs_per_star": 394,
+   "has_license": true,
+   "created": "2026-06-09"
+  },
+  "checked": [
+   "CONTRIBUTING.md",
+   "README.md",
+   "docs/CONTRIBUTING.md",
+   "issue #392",
+   "issue #391",
+   "issue #390",
+   "issue #389",
+   "issue #388",
+   "issue #387"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "appmeee/ClawFreelance": {
+  "target": "appmeee/ClawFreelance",
+  "url": "https://github.com/appmeee/ClawFreelance",
+  "verdict": "CAUTION",
+  "advice": "Minor signals. Probably fine; skim the evidence.",
+  "score": 15,
+  "findings": [
+   {
+    "rule": "VOLUME_NO_RECEPTION",
+    "severity": 15,
+    "title": "Huge PR volume, almost no audience",
+    "why": "273 PR numbers issued against 5 stars (54.6:1). Real projects attract readers roughly in proportion to contributors.",
+    "source": "repo metadata",
+    "sources": [
+     "repo metadata"
+    ],
+    "evidence": "273 PRs / 5 stars / 20 of last 25 merged"
+   }
+  ],
+  "signals": {
+   "stars": 5,
+   "forks": 14,
+   "open_issues": 210,
+   "pr_numbers_issued": 273,
+   "merged_of_25_closed_prs": 20,
+   "prs_per_star": 54.6,
+   "has_license": true,
+   "created": "2026-02-02"
+  },
+  "checked": [
+   "CONTRIBUTING.md",
+   "README.md",
+   "AGENTS.md",
+   "CLAUDE.md",
+   "SECURITY.md",
+   "issue #264"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "bodycount0/soroban-defi-analytics": {
+  "target": "bodycount0/soroban-defi-analytics",
+  "url": "https://github.com/bodycount0/soroban-defi-analytics",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 0,
+   "forks": 2,
+   "open_issues": 7,
+   "pr_numbers_issued": 10,
+   "merged_of_2_closed_prs": 1,
+   "prs_per_star": 10,
+   "has_license": true,
+   "created": "2026-08-08"
+  },
+  "checked": [
+   "CONTRIBUTING.md",
+   "README.md",
+   "issue #4",
+   "issue #3",
+   "issue #2"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "cyrilawoyemi99-max/owockibot-bounty-sync-": {
+  "target": "cyrilawoyemi99-max/owockibot-bounty-sync-",
+  "url": "https://github.com/cyrilawoyemi99-max/owockibot-bounty-sync-",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 0,
+   "forks": 19,
+   "open_issues": 42,
+   "pr_numbers_issued": 58,
+   "merged_of_9_closed_prs": 0,
+   "prs_per_star": 58,
+   "has_license": false,
+   "created": "2026-06-17"
+  },
+  "checked": [
+   "README.md"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "dwebagents/AgentPipe": {
+  "target": "dwebagents/AgentPipe",
+  "url": "https://github.com/dwebagents/AgentPipe",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 203,
+   "forks": 84,
+   "open_issues": 124,
+   "pr_numbers_issued": 2033,
+   "merged_of_30_closed_prs": 24,
+   "prs_per_star": 10.0,
+   "has_license": true,
+   "created": "2026-06-16"
+  },
+  "checked": [
+   "CONTRIBUTING.md",
+   "README.md",
+   "AGENTS.md",
+   "CLAUDE.md",
+   "SECURITY.md"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "fengking-li/group-buying-data-monitor": {
+  "target": "fengking-li/group-buying-data-monitor",
+  "url": "https://github.com/fengking-li/group-buying-data-monitor",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 0,
+   "forks": 13,
+   "open_issues": 10,
+   "pr_numbers_issued": 14,
+   "merged_of_2_closed_prs": 0,
+   "prs_per_star": 14,
+   "has_license": false,
+   "created": "2026-03-05"
+  },
+  "checked": [
+   "README.md"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "go-gitea/gitea": {
+  "target": "go-gitea/gitea",
+  "url": "https://github.com/go-gitea/gitea",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 57372,
+   "forks": 7003,
+   "open_issues": 2605,
+   "pr_numbers_issued": 38923,
+   "merged_of_30_closed_prs": 13,
+   "prs_per_star": 0.7,
+   "has_license": true,
+   "created": "2016-11-01"
+  },
+  "checked": [
+   "CONTRIBUTING.md",
+   "README.md",
+   "AGENTS.md",
+   "CLAUDE.md",
+   "SECURITY.md",
+   "issue #38916"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "gyroflow/gyroflow": {
+  "target": "gyroflow/gyroflow",
+  "url": "https://github.com/gyroflow/gyroflow",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 9307,
+   "forks": 478,
+   "open_issues": 115,
+   "pr_numbers_issued": 1198,
+   "merged_of_30_closed_prs": 12,
+   "prs_per_star": 0.1,
+   "has_license": true,
+   "created": "2021-11-11"
+  },
+  "checked": [
+   "CONTRIBUTING.md",
+   "README.md",
+   "issue #1197",
+   "issue #1194"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "iii123iii/Crystal-PDF": {
+  "target": "iii123iii/Crystal-PDF",
+  "url": "https://github.com/iii123iii/Crystal-PDF",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 3,
+   "forks": 64,
+   "open_issues": 76,
+   "pr_numbers_issued": 99,
+   "merged_of_19_closed_prs": 1,
+   "prs_per_star": 33.0,
+   "has_license": false,
+   "created": "2026-03-26"
+  },
+  "checked": [
+   "AGENTS.md",
+   "CLAUDE.md"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "illbnm/homelab-stack": {
+  "target": "illbnm/homelab-stack",
+  "url": "https://github.com/illbnm/homelab-stack",
+  "verdict": "SUSPICIOUS",
+  "advice": "Review by hand before letting an agent work here.",
+  "score": 30,
+  "findings": [
+   {
+    "rule": "VOLUME_NO_RECEPTION",
+    "severity": 15,
+    "title": "Huge PR volume, almost no audience",
+    "why": "742 PR numbers issued against 9 stars (82.4:1). Real projects attract readers roughly in proportion to contributors.",
+    "source": "repo metadata",
+    "sources": [
+     "repo metadata"
+    ],
+    "evidence": "742 PRs / 9 stars / 0 of last 30 merged"
+   },
+   {
+    "rule": "NOTHING_EVER_MERGES",
+    "severity": 15,
+    "title": "No recently-closed pull request was merged",
+    "why": "If payment depends on a merge that never happens, the bounty cannot pay out.",
+    "source": "repo metadata",
+    "sources": [
+     "repo metadata"
+    ],
+    "evidence": "0 of the last 30 closed pull requests were merged (all closed unmerged)"
+   }
+  ],
+  "signals": {
+   "stars": 9,
+   "forks": 111,
+   "open_issues": 496,
+   "pr_numbers_issued": 742,
+   "merged_of_30_closed_prs": 0,
+   "prs_per_star": 82.4,
+   "has_license": false,
+   "created": "2026-03-17"
+  },
+  "checked": [
+   "README.md"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "jflournoy/for-funsies": {
+  "target": "jflournoy/for-funsies",
+  "url": "https://github.com/jflournoy/for-funsies",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 1,
+   "forks": 12,
+   "open_issues": 25,
+   "pr_numbers_issued": 48,
+   "merged_of_15_closed_prs": 7,
+   "prs_per_star": 48.0,
+   "has_license": true,
+   "created": "2026-07-16"
+  },
+  "checked": [
+   "README.md",
+   "AGENTS.md",
+   ".github/copilot-instructions.md",
+   "issue #43",
+   "issue #41"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "microg/GmsCore": {
+  "target": "microg/GmsCore",
+  "url": "https://github.com/microg/GmsCore",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 14220,
+   "forks": 3035,
+   "open_issues": 1375,
+   "pr_numbers_issued": 3713,
+   "merged_of_30_closed_prs": 2,
+   "prs_per_star": 0.3,
+   "has_license": true,
+   "created": "2014-04-23"
+  },
+  "checked": [
+   "README.md",
+   "issue #3715",
+   "issue #3714",
+   "issue #3710",
+   "issue #3709",
+   "issue #3708"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "pablodelazari/bounty-hunter-sandbox": {
+  "target": "pablodelazari/bounty-hunter-sandbox",
+  "url": "https://github.com/pablodelazari/bounty-hunter-sandbox",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 0,
+   "forks": 6,
+   "open_issues": 10,
+   "pr_numbers_issued": 11,
+   "merged_of_1_closed_prs": 1,
+   "prs_per_star": 11,
+   "has_license": false,
+   "created": "2026-08-09"
+  },
+  "checked": [],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "rohitdash08/FinMind": {
+  "target": "rohitdash08/FinMind",
+  "url": "https://github.com/rohitdash08/FinMind",
+  "verdict": "SUSPICIOUS",
+  "advice": "Review by hand before letting an agent work here.",
+  "score": 30,
+  "findings": [
+   {
+    "rule": "VOLUME_NO_RECEPTION",
+    "severity": 15,
+    "title": "Huge PR volume, almost no audience",
+    "why": "1,189 PR numbers issued against 6 stars (198.2:1). Real projects attract readers roughly in proportion to contributors.",
+    "source": "repo metadata",
+    "sources": [
+     "repo metadata"
+    ],
+    "evidence": "1,189 PRs / 6 stars / 0 of last 30 merged"
+   },
+   {
+    "rule": "NOTHING_EVER_MERGES",
+    "severity": 15,
+    "title": "No recently-closed pull request was merged",
+    "why": "If payment depends on a merge that never happens, the bounty cannot pay out.",
+    "source": "repo metadata",
+    "sources": [
+     "repo metadata"
+    ],
+    "evidence": "0 of the last 30 closed pull requests were merged (all closed unmerged)"
+   }
+  ],
+  "signals": {
+   "stars": 6,
+   "forks": 246,
+   "open_issues": 802,
+   "pr_numbers_issued": 1189,
+   "merged_of_30_closed_prs": 0,
+   "prs_per_star": 198.2,
+   "has_license": true,
+   "created": "2025-08-10"
+  },
+  "checked": [
+   "CONTRIBUTING.md",
+   "README.md"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "sourcey/startup-credits": {
+  "target": "sourcey/startup-credits",
+  "url": "https://github.com/sourcey/startup-credits",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 84,
+   "forks": 95,
+   "open_issues": 182,
+   "pr_numbers_issued": 562,
+   "merged_of_30_closed_prs": 18,
+   "prs_per_star": 6.7,
+   "has_license": true,
+   "created": "2026-07-29"
+  },
+  "checked": [
+   "CONTRIBUTING.md",
+   "README.md",
+   "AGENTS.md",
+   "issue #561",
+   "issue #560",
+   "issue #558"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "thrixel/goal-to-game": {
+  "target": "thrixel/goal-to-game",
+  "url": "https://github.com/thrixel/goal-to-game",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 39,
+   "forks": 10,
+   "open_issues": 5,
+   "pr_numbers_issued": 6,
+   "merged_of_0_closed_prs": 0,
+   "prs_per_star": 0.2,
+   "has_license": true,
+   "created": "2026-08-03"
+  },
+  "checked": [
+   "README.md",
+   "issue #3"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ },
+ "watney-ai/open-source-bounties": {
+  "target": "watney-ai/open-source-bounties",
+  "url": "https://github.com/watney-ai/open-source-bounties",
+  "verdict": "CLEAN",
+  "advice": "No agent-targeting patterns found in the text checked.",
+  "score": 0,
+  "findings": [],
+  "signals": {
+   "stars": 0,
+   "forks": 31,
+   "open_issues": 18,
+   "pr_numbers_issued": 21,
+   "merged_of_3_closed_prs": 0,
+   "prs_per_star": 21,
+   "has_license": false,
+   "created": "2026-04-28"
+  },
+  "checked": [
+   "README.md"
+  ],
+  "api_calls": 15,
+  "version": "1.0.0"
+ }
+}

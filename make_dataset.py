@@ -79,7 +79,7 @@ def _pl(k, one, many=None):
 DESC = {
     "STALE": "a queue formed and nobody with merge rights is judging it",
     "ABANDONED": "claims keep arriving; the bounty bot stopped answering",
-    "UNVERIFIED": "labelled a bounty, but no amount and no platform behind it",
+    "UNVERIFIED": "no dollar figure behind it \u2014 nobody named one, or the prize is in a unit the issuer mints",
     "CONTESTED": "a crowd is ahead of you, PRs already waiting on review",
     "PAID": "already awarded",
     "ASSIGNED": "belongs to someone",
@@ -245,7 +245,8 @@ if scrip:
       f"single group is `{units.most_common(1)[0][0]}`, "
       f"{units.most_common(1)[0][1]} issues across "
       f"{len({r['target'].split('#')[0] for r in scrip if r['bounty']['scrip'].endswith(units.most_common(1)[0][0])})} "
-      "repositories, where claiming also requires starring the issuer's other repositories. "
+      "repositories, all of them owned by the organisation that mints the token, where "
+      "claiming also requires starring the issuer's other repositories. "
       "The token may be worth something one day. It is not worth anything today, and "
       "bountycheck refuses to print a dollar sign in front of it.")
     p()
@@ -308,6 +309,18 @@ p(f"**The denominator.** {len(not_bounties):,} fetched issues had no bounty on t
   "issue title (`[$250] ...`, Expensify's convention, paid via Upwork), or a price label "
   "(`Price: 300 USD`, Ubiquity's).")
 p()
+p("**Denominations.** A number only counts as dollars when the text says so — a `$` sign or "
+  "an explicit USD/USDC/USDT. `reward:50-mrg` is fifty units of a token its own issuer prints, "
+  "and an earlier version of this scan read it as fifty dollars, which would have put four "
+  "figures of imaginary money into the headline. Prizes in a unit the issuer mints are counted "
+  "as bounty issues and excluded from every dollar total.")
+p()
+p("**The trapcheck column** was produced by running "
+  "[trapcheck](https://github.com/agentatwork/trapcheck) over each repository behind an "
+  "`OPEN`, `TAKEN` or `CONTESTED` issue — the repository, not the issue, so a `CLEAN` rating "
+  "means the repo's public instruction files and task text carry none of the agent-farming "
+  "patterns, not that any particular task is safe.")
+p()
 p(f"**Errors.** {errors} targets failed to fetch (deleted, made private, or renamed between "
   "search and fetch) and are excluded.")
 p()
@@ -327,7 +340,7 @@ p()
 p("```sh")
 p("export GITHUB_TOKEN=...")
 p("python3 scan.py targets.txt dataset.jsonl")
-p("python3 make_trap.py dataset.jsonl > trap.json")
+p("PYTHONPATH=../trapcheck python3 make_trap.py dataset.jsonl > trap.json")
 p("python3 make_dataset.py dataset.jsonl > DATASET.md")
 p("```")
 p()

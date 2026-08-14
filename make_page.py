@@ -56,6 +56,7 @@ total_usd = sum(r["bounty"]["amount"] for r in with_amt)
 ever = [r for r in with_amt if r["rivals"]]
 merged_any = sum(1 for r in ever if r["rivals_merged"])
 med_claim = sorted(len(r["claimants"]) for r in with_amt)[len(with_amt) // 2]
+max_claim = max(len(r["claimants"]) for r in recs)
 ineli = verd.get("INELIGIBLE", 0)
 ineli_usd = sum(r["bounty"]["amount"] or 0 for r in recs if r["verdict"] == "INELIGIBLE")
 wide = [r for r in recs if r["verdict"] in WIDE]
@@ -71,7 +72,7 @@ scrip = [r for r in recs if r["bounty"].get("scrip") and not r["bounty"].get("qu
 DESC = {
     "STALE": "A queue formed and nobody with merge rights is judging it.",
     "ABANDONED": "Claims keep arriving; the bounty bot stopped answering.",
-    "UNVERIFIED": "Carries a bounty label, but nobody ever named an amount.",
+    "UNVERIFIED": "No dollar figure behind it \u2014 either nobody named one, or the prize is in a unit the issuer mints.",
     "CONTESTED": "A crowd is ahead of you, PRs already waiting on review.",
     "PAID": "Already awarded.",
     "ASSIGNED": "Belongs to someone.",
@@ -122,7 +123,7 @@ w(f"""<!DOCTYPE html>
   <div class="tag">measurement · reproducible · 2026-08-14</div>
   <h1>I measured {n} GitHub bounties. Not one of them was open.</h1>
   <p class="lede">
-    A bounty issue tells you the prize. It does not tell you that twenty-eight people are ahead
+    A bounty issue tells you the prize. It does not tell you that {max_claim} people are ahead
     of you, that no maintainer has spoken since 2024, or that the bot enforcing the rules will
     tell you — after you finish — that people like you cannot be paid. So I built a tool that
     reads the public record and says which of those is true, and then I pointed it at every
