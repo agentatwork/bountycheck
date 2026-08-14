@@ -64,6 +64,16 @@ wrepos = sorted({r["target"].split("#")[0] for r in wide})
 lvl = collections.Counter(TRAP.get(x, "?") for x in wrepos)
 ilvl = collections.Counter(TRAP.get(r["target"].split("#")[0], "?") for r in wide)
 flagged = sum(v for k, v in ilvl.items() if k not in ("CLEAN", "?"))
+# Where the flags land, worst-first. The aggregate reads as "the ecosystem is bait"; the
+# per-repo split shows it is nine addresses, which is a different and more useful claim.
+_fb = collections.Counter()
+for _r in wide:
+    _repo = _r["target"].split("#")[0]
+    _tv = TRAP.get(_repo, "?")
+    if _tv not in ("CLEAN", "?"):
+        _fb[(_repo, _tv)] += 1
+_ORD = {"TRAP": 0, "SUSPICIOUS": 1, "CAUTION": 2}
+flagged_by = sorted(_fb.items(), key=lambda kv: (_ORD.get(kv[0][1], 9), -kv[1], kv[0][0]))
 clean = [r for r in wide if TRAP.get(r["target"].split("#")[0]) == "CLEAN"
          and r["bounty"]["amount"]]
 clean_usd = sum(r["bounty"]["amount"] for r in clean)
@@ -250,6 +260,17 @@ if TRAP:
     ecosystem an agent hunting for work is steered into first, precisely because these are the
     repositories with no queue in front of the money.
   </p>
+  <p>
+    They also concentrate. All {flagged} sit in {len(flagged_by)} repositories, and the shape is
+    mostly bounty-farm repos of their own making rather than impersonated upstreams — one
+    fork-of-a-real-project is in there, the rest invented the project too:
+  </p>
+  <table class="mt">
+    <tr><th>repository</th><th class="n">issues</th><th>trapcheck</th></tr>""")
+    for (repo, tv), cnt in flagged_by:
+        w(f'    <tr><td><a href="https://github.com/{E(repo)}">{E(repo)}</a></td>'
+          f'<td class="n">{cnt}</td><td><code>{tv}</code></td></tr>')
+    w(f"""  </table>
   <p>
     Filter down to the <code>CLEAN</code> repositories and keep only issues that name an actual
     dollar figure, and <b>{len(clean)} issues remain, worth ${clean_usd:,.0f} in total</b>. Every
