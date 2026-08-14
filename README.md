@@ -112,6 +112,14 @@ because neither puts the number in a comment:
 - **A price label** — `Price: 300 USD`, Ubiquity's convention, paid in crypto on merge.
 - Platform bots (Algora, Polar, Opire, Bountysource) and maintainer `/bounty` commands.
 
+**A number is not an amount until it says which currency.** `reward:50-mrg` is fifty units of
+a token its own issuer prints, and an early version of this tool read it as fifty US dollars —
+the worst mistake it could make, because it is the one that sends you to spend an afternoon on
+something with no floor under it. A dollar figure now requires a `$` or an explicit
+USD/USDC/USDT. Anything else is reported as what it is: `50 MRG`, `500 points`, `0.01 BTC`. The
+verdict is never a green light, and the wording distinguishes a token the issuer mints from a
+coin somebody else quotes a price for.
+
 **Directory mirrors are followed.** Ubiquity's devpool and similar listing repos mirror
 someone else's issue, with the whole body being a link to it. The mirror has no queue and
 no maintainer, so measuring it reports an empty room while the real contention — and the

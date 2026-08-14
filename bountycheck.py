@@ -64,10 +64,21 @@ LABEL_PRICE = re.compile(
     r"|(?:price|bounty|reward|prize)\W{0,4}([\d,]+(?:\.\d+)?)\s*(?:usdc?|usdt|dollars?)\b"
     r"|^\$\s?([\d,]+(?:\.\d+)?)$", re.I)
 
-# A prize denominated in something the issuer prints. Points, credits, or a ticker nobody
-# quotes. It may be worth something one day; it is not money today.
-SCRIP = re.compile(r"\b(\d[\d,]*)\s*[-\s]?((?!USD|USDC|USDT|EUR|GBP)[A-Z]{2,6})\b"
-                   r"|\b(\d[\d,]*)\s*(points?|credits?|tokens?|stars?)\b", re.I)
+# A prize denominated in something other than dollars. Two shapes only, both of them
+# deliberate on the issuer's part: a bracketed title prefix (`[50 MRG] Add a TTS backend`)
+# and a price-ish label (`reward:50-mrg`). Scanning loose prose for "number followed by a
+# short word" finds `2 hours`, `3 more` and `1 API` in perfectly ordinary titles, and a
+# detector that cries scrip at every issue is worth less than no detector at all.
+TITLE_UNIT = re.compile(r"^\s*[\[(]\s*([\d,]+(?:\.\d+)?)\s*[-\s]?([A-Za-z]{2,6})\s*[\])]")
+LABEL_UNIT = re.compile(
+    r"(?:price|bounty|reward|prize)\W{0,4}([\d,]+(?:\.\d+)?)\s*[-\s]?([a-z]{2,6})\b"
+    r"|\b(\d[\d,]*)\s*(points?|credits?|tokens?|stars?)\b", re.I)
+# Not scrip: these have a market price somebody else sets. The amount is still not a
+# dollar figure, so it is still not a green light - but the reason is different and the
+# tool should not tell you Bitcoin is a token its issuer prints.
+QUOTED = {"BTC", "SATS", "ETH", "SOL", "XMR", "LTC", "DOGE", "BNB", "AVAX", "MATIC",
+          "DOT", "ADA", "XRP", "ATOM", "NEAR", "TIA", "OP", "ARB"}
+FIAT = {"USD", "USDC", "USDT", "EUR", "GBP", "CAD", "AUD", "CHF", "JPY", "INR"}
 # A directory entry whose entire body is a link to the issue it mirrors.
 MIRROR = re.compile(r"^https://github\.com/([\w.-]+)/([\w.-]+)/issues/(\d+)/?$")
 
@@ -193,7 +204,8 @@ class GH:
 # --------------------------------------------------------------------------------------
 def find_bounty(issue: dict, comments: list) -> dict:
     """Amount and platform, from whichever of the three places announced it."""
-    out = {"amount": None, "platform": None, "posted_at": None, "source": None, "scrip": None}
+    out = {"amount": None, "platform": None, "posted_at": None, "source": None,
+           "scrip": None, "quoted": False}
 
     body = issue.get("body") or ""
     for name, who, amt in PLATFORMS:
@@ -243,14 +255,21 @@ def find_bounty(issue: dict, comments: list) -> dict:
                 break
 
     if out["amount"] is None:
-        for text in [issue.get("title") or ""] + [l.get("name") or "" for l in issue.get("labels", [])]:
-            m = SCRIP.search(text)
-            if m:
-                unit = m.group(2) or m.group(4)
-                out.update(platform=out["platform"] or "scrip",
-                           scrip=f"{m.group(1) or m.group(3)} {unit.upper()}",
-                           source=f"{text.strip()!r}")
-                break
+        title = issue.get("title") or ""
+        cands = [(TITLE_UNIT, title)]
+        cands += [(LABEL_UNIT, l.get("name") or "") for l in issue.get("labels", [])]
+        for pat, text in cands:
+            m = pat.search(text)
+            if not m:
+                continue
+            qty = m.group(1) or m.group(3)
+            unit = (m.group(2) or m.group(4) or "").upper()
+            if unit in FIAT or not unit:
+                continue
+            out.update(platform=out["platform"] or "scrip",
+                       scrip=f"{qty} {unit}", quoted=unit in QUOTED,
+                       source=f"{text.strip()!r}")
+            break
 
     # A `💎 Bounty`-style label is weak evidence, but it is evidence when nothing else spoke.
     # It must not overwrite a source that did speak: an issue tagged both `bounty` and
@@ -416,6 +435,10 @@ def decide(f: dict) -> tuple[str, str]:
     if f["bounty"]["amount"] is None and f["bounty"]["platform"] is None:
         return "NO BOUNTY", "No bounty found on this issue. Whatever sent you here was not the issue itself."
     if f["bounty"].get("scrip"):
+        if f["bounty"].get("quoted"):
+            return "UNVERIFIED", (f"The prize is {f['bounty']['scrip']} - real money, but not a "
+                                  "fixed number of dollars. Price it at today's rate before you "
+                                  "decide the work is worth it.")
         return "UNVERIFIED", (f"The prize is {f['bounty']['scrip']} - a unit the issuer mints, not "
                               "money. It may be worth something one day. Price it yourself before "
                               "you spend an afternoon on it.")

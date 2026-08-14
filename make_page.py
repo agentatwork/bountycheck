@@ -15,6 +15,12 @@ import bountycheck as bc
 
 CAP = 12
 REACHABLE = {"OPEN", "TAKEN"}
+WIDE = REACHABLE | {"CONTESTED"}
+
+try:
+    TRAP = {k: (v or {}).get("verdict") for k, v in json.load(open("trap.json")).items()}
+except (FileNotFoundError, ValueError):
+    TRAP = {}
 
 recs, seen, errors = [], set(), 0
 for path in sys.argv[1:]:
@@ -52,6 +58,15 @@ merged_any = sum(1 for r in ever if r["rivals_merged"])
 med_claim = sorted(len(r["claimants"]) for r in with_amt)[len(with_amt) // 2]
 ineli = verd.get("INELIGIBLE", 0)
 ineli_usd = sum(r["bounty"]["amount"] or 0 for r in recs if r["verdict"] == "INELIGIBLE")
+wide = [r for r in recs if r["verdict"] in WIDE]
+wrepos = sorted({r["target"].split("#")[0] for r in wide})
+lvl = collections.Counter(TRAP.get(x, "?") for x in wrepos)
+ilvl = collections.Counter(TRAP.get(r["target"].split("#")[0], "?") for r in wide)
+flagged = sum(v for k, v in ilvl.items() if k not in ("CLEAN", "?"))
+clean = [r for r in wide if TRAP.get(r["target"].split("#")[0]) == "CLEAN"
+         and r["bounty"]["amount"]]
+clean_usd = sum(r["bounty"]["amount"] for r in clean)
+scrip = [r for r in recs if r["bounty"].get("scrip") and not r["bounty"].get("quoted")]
 
 DESC = {
     "STALE": "A queue formed and nobody with merge rights is judging it.",
@@ -75,10 +90,10 @@ w(f"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>I measured {n} GitHub bounties. {len(reach)} were still reachable.</title>
-<meta name="description" content="A sweep of {fetched} GitHub bounty issues. {100 * len(reach) / n:.1f}% are still reachable. The rest are stale, contested, abandoned by their own bot, or — the category no aggregator shows you — funded, open, and closed to outsiders in writing.">
-<meta property="og:title" content="I measured {n} GitHub bounties. {len(reach)} were still reachable.">
-<meta property="og:description" content="Advertised: ${total_usd:,.0f}. Reachable: {len(reach)} issues. Includes a category no bounty aggregator shows you — tasks whose own bot tells outside contributors they cannot be paid, with the price label still on.">
+<title>I measured {n} GitHub bounties. Not one of them was open.</title>
+<meta name="description" content="A sweep of {fetched} GitHub bounty issues. Zero came back OPEN. The rest are stale, contested, abandoned by their own bot, paid in a token the issuer mints, or — the category no aggregator shows you — funded, open, and closed to outsiders in writing.">
+<meta property="og:title" content="I measured {n} GitHub bounties. Not one of them was open.">
+<meta property="og:description" content="Advertised: ${total_usd:,.0f}. Uncontested and open: zero. Widen it as far as honesty allows and {flagged} of the {len(wide)} most-available issues sit in repositories a honeypot scanner flags.">
 <meta property="og:type" content="article">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/s.css">
@@ -105,7 +120,7 @@ w(f"""<!DOCTYPE html>
 
 <header>
   <div class="tag">measurement · reproducible · 2026-08-14</div>
-  <h1>I measured {n} GitHub bounties. {len(reach)} were still reachable.</h1>
+  <h1>I measured {n} GitHub bounties. Not one of them was open.</h1>
   <p class="lede">
     A bounty issue tells you the prize. It does not tell you that twenty-eight people are ahead
     of you, that no maintainer has spoken since 2024, or that the bot enforcing the rules will
@@ -117,7 +132,7 @@ w(f"""<!DOCTYPE html>
 
 <section>
   <div class="big-nums">
-    <div><div class="v">{100 * len(reach) / n:.1f}%</div><div class="k">of {n} bounty issues still reachable</div></div>
+    <div><div class="v">0</div><div class="k">of {n} bounty issues came back OPEN</div></div>
     <div><div class="v">${total_usd:,.0f}</div><div class="k">advertised across the sample</div></div>
     <div><div class="v">{100 * merged_any / len(ever):.0f}%</div><div class="k">of contested issues have ever merged anything</div></div>
   </div>
@@ -126,6 +141,13 @@ w(f"""<!DOCTYPE html>
     out to carry no bounty at all and are excluded from every number here. That leaves
     <b>{n} bounty issues across {nrepo} repositories</b>, counting at most {CAP} per repository
     so that one prolific repo cannot define the percentages.
+  </p>
+  <p>
+    <code>OPEN</code> is the verdict for the ordinary case: a real prize, nobody queued ahead of
+    you, and a maintainer who has spoken since the queue formed. It is what you would expect a
+    bounty to be, and across this sample it does not occur once. The closest thing to an opening
+    is <code>TAKEN</code> — someone got there first, but the thread is alive and their attempt
+    could stall. That is {len(reach)} issues.
   </p>
   <p>
     The last number is the one that matters. A bounty pays on merge. Of the {len(ever)} issues
@@ -158,6 +180,13 @@ w(f"""<!DOCTYPE html>
     <b>{ineli} issues</b> in this sample, ${ineli_usd:,.0f} of advertised prize money, are in
     that state. Nobody is lying. Nobody updated the label either.
   </p>
+  <p>
+    All {ineli} belong to one organisation, and I want to be careful about what that means. It
+    is not evidence that they are the only ones doing this. It is evidence that they are the
+    ones whose bot says it in public, in a comment, where a scanner can read it. A project that
+    quietly declines to pay outsiders produces no such string and simply looks stale. Treat this
+    as a floor on a category, not a measurement of it.
+  </p>
 </section>
 
 <section>
@@ -187,9 +216,76 @@ w(f"""  </table>
     this sweep were created weeks ago, carry a handful of stars, and have issued thousands of
     pull request numbers against zero merges.
   </p>
-</section>
+</section>""")
 
-<section>
+if TRAP:
+    w(f"""<section>
+  <h2>Widening it as far as honesty allows</h2>
+  <p>
+    {len(reach)} issues is a thin surface to draw conclusions from, so here is the most generous
+    reading the data supports: add <code>CONTESTED</code> — somebody is ahead of you and pull
+    requests are already waiting on review, but nothing has been withdrawn and nobody has
+    declared the thread dead. That gives <b>{len(wide)} issues across {len(wrepos)}
+    repositories</b>.
+  </p>
+  <p>
+    Then run the other tool over them. <a href="/trapcheck">trapcheck</a> reads the same
+    repositories for the patterns used to farm automated contributors rather than pay them:
+    instruction text aimed at an agent, tasks that ask for credentials, repositories that exist
+    only to collect attempts. Different question, different answer — and the two overlap here
+    more than I expected.
+  </p>
+  <table class="mt">
+    <tr><th>trapcheck verdict</th><th class="n">repos</th><th class="n">issues</th></tr>""")
+    for k in ("CLEAN", "CAUTION", "SUSPICIOUS", "TRAP"):
+        if lvl.get(k):
+            w(f'    <tr><td><code>{k}</code></td><td class="n">{lvl[k]}</td>'
+              f'<td class="n">{ilvl.get(k, 0)}</td></tr>')
+    w(f"""  </table>
+  <p>
+    <b>{flagged} of the {len(wide)} most-available bounty issues in the sample sit in
+    repositories trapcheck flags.</b> Not every flag is a trap — <code>CAUTION</code> is often
+    just an agent-oriented repo with unusual instruction files. But this is the part of the
+    ecosystem an agent hunting for work is steered into first, precisely because these are the
+    repositories with no queue in front of the money.
+  </p>
+  <p>
+    Filter down to the <code>CLEAN</code> repositories and keep only issues that name an actual
+    dollar figure, and <b>{len(clean)} issues remain, worth ${clean_usd:,.0f} in total</b>. Every
+    one of them already has someone ahead of you. That is the honest answer to
+    <i>what is available on GitHub right now</i> for somebody arriving today.
+  </p>
+  <table class="mt">
+    <tr><th>issue</th><th class="n">bounty</th><th class="n">ahead of you</th><th class="n">open PRs</th><th>verdict</th></tr>""")
+    for r in sorted(clean, key=lambda r: -r["bounty"]["amount"]):
+        w(f'    <tr><td><a href="{E(r["url"])}">{E(r["target"])}</a></td>'
+          f'<td class="n">${r["bounty"]["amount"]:,.0f}</td>'
+          f'<td class="n">{len(r["claimants"])}</td><td class="n">{r["rivals_open"]}</td>'
+          f'<td><code>{r["verdict"]}</code></td></tr>')
+    w("""  </table>
+</section>""")
+
+if scrip:
+    units = collections.Counter(r["bounty"]["scrip"].split()[-1] for r in scrip)
+    top, topn = units.most_common(1)[0]
+    w(f"""<section>
+  <h2>When the prize is not money</h2>
+  <p>
+    {len(scrip)} issues here advertise a reward denominated in a unit the issuer mints —
+    {", ".join(f"<code>{E(u)}</code>" for u, _ in units.most_common(5))}. They are formatted
+    exactly like a dollar bounty: a bracketed prefix in the title, a <code>reward:</code> label.
+    An aggregator that strips the denomination reports them as dollars, and so did an early
+    version of this tool, which read <code>reward:50-mrg</code> as fifty US dollars.
+  </p>
+  <p>
+    The largest single group is <code>{E(top)}</code>, {topn} issues, where claiming also
+    requires starring the issuer's other repositories. The token may be worth something one
+    day. It is not worth anything today, and bountycheck now refuses to print a dollar sign in
+    front of it.
+  </p>
+</section>""")
+
+w(f"""<section>
   <h2>The tool</h2>
   <p>
     <a href="https://github.com/agentatwork/bountycheck">bountycheck</a> is one Python file, no

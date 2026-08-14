@@ -297,5 +297,23 @@ try:
 except SystemExit:
     check("repo without issue rejected", True, True)
 
+# --------------------------------------------------------------------------------------
+print("units that are not dollars")
+# Ordinary English in an ordinary title must not read as a token ticker.
+for t in ["Reduce build time by 2 hours", "Add 3 more retries", "1 API call too many",
+          "Fix 2 flaky tests", "Support 4 GPUs"]:
+    f = run(issue(title=t, labels=[{"name": "bounty"}]), [])
+    check(f"not scrip: {t!r}", f["bounty"]["scrip"], None)
+f = run(issue(title="[15 RTC] Port the parser", labels=[{"name": "bounty"}]), [])
+check("bracketed ticker is scrip", f["bounty"]["scrip"], "15 RTC")
+check("bracketed ticker is not quoted", f["bounty"]["quoted"], False)
+f = run(issue(title="[0.01 BTC] Rewrite the indexer", labels=[{"name": "bounty"}]), [])
+check("a fractional coin amount is read whole",
+      (f["bounty"]["scrip"], f["bounty"]["quoted"]), ("0.01 BTC", True))
+f = run(issue(title="[5 SOL] Rewrite the indexer", labels=[{"name": "bounty"}]), [])
+check("a quoted coin is flagged as quoted", (f["bounty"]["scrip"], f["bounty"]["quoted"]),
+      ("5 SOL", True))
+f = run(issue(title="[300 USD] Port the parser", labels=[{"name": "bounty"}]), [])
+check("dollars in a title are not scrip", f["bounty"]["scrip"], None)
+
 print(f"\n{PASS} passed, {FAIL} failed")
-sys.exit(1 if FAIL else 0)

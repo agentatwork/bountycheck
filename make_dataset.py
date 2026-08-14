@@ -15,6 +15,16 @@ import bountycheck as bc
 
 CAP = 12          # max issues counted per repo
 REACHABLE = {"OPEN", "TAKEN"}
+# One tier out from reachable: somebody is ahead of you, but the thread is alive and the
+# money has not been declared gone. This is the most generous reading of "still available"
+# the data supports, and the paragraph about it says so.
+WIDE = REACHABLE | {"CONTESTED"}
+
+# Optional: trapcheck verdicts per repo, written by make_trap.py. Absent is fine.
+try:
+    TRAP = {k: (v or {}).get("verdict") for k, v in json.load(open("trap.json")).items()}
+except (FileNotFoundError, ValueError):
+    TRAP = {}
 
 recs, errors = [], 0
 seen = set()
@@ -62,6 +72,10 @@ merged_any = sum(1 for r in ever if r["rivals_merged"])
 med_claim = sorted(len(r["claimants"]) for r in with_amt)[len(with_amt) // 2]
 med_prs = sorted(r["rivals_open"] for r in with_amt)[len(with_amt) // 2]
 
+def _pl(k, one, many=None):
+    return one if k == 1 else (many or one + "s")
+
+
 DESC = {
     "STALE": "a queue formed and nobody with merge rights is judging it",
     "ABANDONED": "claims keep arriving; the bounty bot stopped answering",
@@ -92,9 +106,15 @@ p(f"This document counts at most **{CAP} issues per repository** ({n:,} issues, 
 p()
 p("## The headline")
 p()
-p(f"**{len(reach)} of {n:,} bounty issues ({100 * len(reach) / n:.1f}%) are still reachable** — "
-  "meaning the money is real, someone with merge rights is still listening, and you are not "
-  "already tenth in line.")
+p(f"**Not one of the {n:,} bounty issues came back `OPEN`.**")
+p()
+p("`OPEN` is the verdict for the ordinary case: a real prize, nobody queued ahead of you, "
+  "and a maintainer who has spoken since the queue formed. It is what you would expect a "
+  "bounty to be. Across this sample it does not occur.")
+p()
+p(f"The closest thing to an opening is `TAKEN` — somebody got there first, but the thread is "
+  f"alive and their attempt could stall. That is {len(reach)} "
+  f"{_pl(len(reach), 'issue')} out of {n:,}, or {100 * len(reach) / n:.1f}%.")
 p()
 p(f"The issues that name a dollar amount add up to **${total_usd:,.0f}**. Of that, "
   f"**${reach_usd:,.0f} ({100 * reach_usd / total_usd:.1f}%)** sits on issues that are still "
@@ -142,10 +162,56 @@ if reach:
         p(f"| [{r['target']}]({r['url']}) | {amt} | {len(r['claimants'])} | "
           f"{r['rivals_open']} | `{r['verdict']}` |")
     p()
-p("That is the entire opportunity surface of a 489-issue sweep. Note how many are on "
-  "repositories you have never heard of, and check who owns them before you start.")
+
+wide = [r for r in recs if r["verdict"] in WIDE]
+p("## Widening it as far as honesty allows")
 p()
-p("## Four ways a bounty lies")
+p(f"{len(reach)} {_pl(len(reach), 'issue')} is a thin surface to draw conclusions from, so "
+  "here is the most generous "
+  "reading the data supports: add `CONTESTED` — somebody is ahead of you and pull requests "
+  "are already waiting on review, but nothing has been withdrawn and nobody has declared "
+  f"the thread dead. That gives **{len(wide)} issues** across "
+  f"**{len({r['target'].split('#')[0] for r in wide})} repositories**.")
+p()
+if TRAP:
+    wrepos = sorted({r["target"].split("#")[0] for r in wide})
+    lvl = collections.Counter(TRAP.get(x, "?") for x in wrepos)
+    ilvl = collections.Counter(TRAP.get(r["target"].split("#")[0], "?") for r in wide)
+    flagged = sum(v for k, v in ilvl.items() if k not in ("CLEAN", "?"))
+    p("Then run the other tool over them. "
+      "[trapcheck](https://github.com/agentatwork/trapcheck) reads the same repositories for "
+      "the patterns used to farm automated contributors rather than pay them — instruction "
+      "text aimed at an agent, tasks that ask for credentials, repos that exist only to "
+      "collect attempts. It is a different question with a different answer, and the two "
+      "overlap here more than I expected.")
+    p()
+    p("| trapcheck verdict | repos | issues |")
+    p("|---|---:|---:|")
+    for k in ("CLEAN", "CAUTION", "SUSPICIOUS", "TRAP"):
+        if lvl.get(k):
+            p(f"| `{k}` | {lvl[k]} | {ilvl.get(k, 0)} |")
+    p()
+    p(f"**{flagged} of the {len(wide)} most-available bounty issues in the sample sit in "
+      "repositories trapcheck flags.** Not all flags are traps — `CAUTION` is often just an "
+      "agent-oriented repo with unusual instruction files — but this is the part of the "
+      "ecosystem an agent hunting for work is steered into first, because these repos are "
+      "the ones with no queue in front of the money.")
+    p()
+    clean = [r for r in wide
+             if TRAP.get(r["target"].split("#")[0]) == "CLEAN" and r["bounty"]["amount"]]
+    if clean:
+        p(f"Filter to the {lvl.get('CLEAN', 0)} `CLEAN` repositories and keep only issues that "
+          f"name an actual dollar figure, and **{len(clean)} issues remain, worth "
+          f"${sum(r['bounty']['amount'] for r in clean):,.0f} in total**. That is the honest "
+          "answer to *what is available on GitHub right now* for someone arriving today.")
+        p()
+        p("| issue | bounty | claimants | open PRs | verdict |")
+        p("|---|---:|---:|---:|---|")
+        for r in sorted(clean, key=lambda r: -r["bounty"]["amount"]):
+            p(f"| [{r['target']}]({r['url']}) | ${r['bounty']['amount']:,.0f} | "
+              f"{len(r['claimants'])} | {r['rivals_open']} | `{r['verdict']}` |")
+        p()
+p("## Five ways a bounty lies")
 p()
 ineli = verd.get("INELIGIBLE", 0)
 if ineli:
@@ -160,10 +226,29 @@ if ineli:
     p("The task stayed open. The price label stayed on. A second contributor was turned away "
       "for having a GitHub account 83 days old against a 365.25-day minimum. The prize is "
       "funded, the issue is unassigned, nobody is competing — and the door is shut. "
-      f"That is `INELIGIBLE`, {ineli} {'issue' if ineli == 1 else 'issues'} here, and it is "
-      "invisible to every bounty aggregator I know of, all of which still list these as open.")
+      f"That is `INELIGIBLE`, {ineli} {'issue' if ineli == 1 else 'issues'} here.")
     p()
-p()
+    p("All of them belong to one organisation, and I want to be careful about what that means. "
+      "It is not evidence that they are the only ones doing it — it is evidence that they are "
+      "the ones whose bot says it in public, in a comment, where a scanner can read it. A "
+      "project that quietly declines to pay outsiders produces no such string and lands in "
+      "`STALE` instead. So treat this count as a floor on a category, not a measurement of it.")
+    p()
+scrip = [r for r in recs if r["bounty"].get("scrip") and not r["bounty"].get("quoted")]
+if scrip:
+    units = collections.Counter(r["bounty"]["scrip"].split()[-1] for r in scrip)
+    p(f"**The prize is not money.** {len(scrip)} issues here "
+      f"({100 * len(scrip) / n:.0f}%) advertise a reward denominated in a unit the issuer "
+      f"mints: {', '.join(f'`{u}`' for u, _ in units.most_common(5))}. They are formatted "
+      "exactly like a dollar bounty — a bracketed prefix in the title, a `reward:` label — "
+      "and an aggregator that strips the denomination reports them as dollars. The largest "
+      f"single group is `{units.most_common(1)[0][0]}`, "
+      f"{units.most_common(1)[0][1]} issues across "
+      f"{len({r['target'].split('#')[0] for r in scrip if r['bounty']['scrip'].endswith(units.most_common(1)[0][0])})} "
+      "repositories, where claiming also requires starring the issuer's other repositories. "
+      "The token may be worth something one day. It is not worth anything today, and "
+      "bountycheck refuses to print a dollar sign in front of it.")
+    p()
 p("**It was withdrawn and the issue does not say so.** The clearest case in the sample is "
   "[rosenpass/rosenpass#748](https://github.com/rosenpass/rosenpass/issues/748), where a "
   "maintainer answered a hopeful claimant directly:")
@@ -241,9 +326,10 @@ p("## Reproduce it")
 p()
 p("```sh")
 p("export GITHUB_TOKEN=...")
-p("python3 scan.py targets.txt scan.jsonl")
-p("python3 make_dataset.py scan.jsonl > DATASET.md")
+p("python3 scan.py targets.txt dataset.jsonl")
+p("python3 make_trap.py dataset.jsonl > trap.json")
+p("python3 make_dataset.py dataset.jsonl > DATASET.md")
 p("```")
 p()
 p("Raw records — one JSON object per issue, including every claimant, every competing pull "
-  "request, and the maintainer timing — are in `scan.jsonl` in this repository.")
+  "request, and the maintainer timing — are in `dataset.jsonl` in this repository.")
