@@ -114,7 +114,14 @@ INELIGIBLE = re.compile(
 AWARDED = re.compile(r"\b(?:has\s+been\s+awarded|bounty\s+(?:has\s+been\s+)?paid"
                      r"|reward(?:ed)?\s+(?:of\s+)?\$[\d,]+\s+(?:has\s+been\s+)?(?:rewarded|awarded|sent))\b", re.I)
 
-NOW = datetime.now(timezone.utc)
+# Every "days since" in `decide()` is measured from here, so several verdicts are functions of
+# the calendar as much as of the issue: an issue that is CONTESTED today becomes STALE once the
+# maintainer silence crosses a threshold, with nothing about the issue having changed. That makes
+# a regenerated report a moving target -- re-running make_dataset.py two weeks after a scan
+# quietly restates verdicts as if they were findings of that scan. Set BOUNTYCHECK_NOW to the
+# scan date to reproduce a dated report exactly.
+NOW = (datetime.fromisoformat(os.environ["BOUNTYCHECK_NOW"]).replace(tzinfo=timezone.utc)
+       if os.environ.get("BOUNTYCHECK_NOW") else datetime.now(timezone.utc))
 
 
 def _days(iso: str | None) -> int | None:
@@ -173,29 +180,41 @@ class GH:
                 raise
         return None
 
-    def _paged(self, url: str, cap: int = 400) -> list:
-        """Follow pages until exhausted. A two-year-old bounty easily exceeds one page,
-        and truncating it would undercount exactly the contention we are here to measure."""
+    def _paged(self, url: str, cap: int = 400):
+        """Follow pages up to `cap` items, and return whether the cap is what stopped us.
+
+        The cap is deliberate: a farmed issue can carry two thousand comments, and reading
+        all of them spends somebody else's rate limit for very little extra signal. What was
+        not deliberate is that the old version returned a bare list, which cannot be told
+        apart from a thread that really ended there. That matters more here than it would
+        elsewhere, because GitHub serves comments and timeline events **oldest first** — so
+        hitting the cap discards the *newest* events, which are exactly the ones every
+        recency verdict in this file is computed from.
+
+        Returns `(items, truncated)`. When the cap binds, one extra single-item request
+        settles whether anything was actually cut off; a flag that is wrong whenever a
+        thread happens to be exactly `cap` long is not worth recording.
+        """
         out: list = []
         page = 1
         sep = "&" if "?" in url else "?"
         while len(out) < cap:
             d = self._get(f"{url}{sep}per_page=100&page={page}")
             if not d:
-                break
+                return out, False              # pages ran out: this is the real end
             out.extend(d)
             if len(d) < 100:
-                break
+                return out, False              # short page: also the real end
             page += 1
-        return out
+        return out, bool(self._get(f"{url}{sep}per_page=1&page={cap + 1}"))
 
     def issue(self, owner: str, name: str, num: int):
         return self._get(f"{API}/repos/{owner}/{name}/issues/{num}")
 
-    def comments(self, owner: str, name: str, num: int) -> list:
+    def comments(self, owner: str, name: str, num: int):
         return self._paged(f"{API}/repos/{owner}/{name}/issues/{num}/comments")
 
-    def timeline(self, owner: str, name: str, num: int) -> list:
+    def timeline(self, owner: str, name: str, num: int):
         return self._paged(f"{API}/repos/{owner}/{name}/issues/{num}/timeline")
 
 
@@ -505,8 +524,8 @@ def analyse(owner: str, name: str, num: int, gh: GH, _via: str | None = None) ->
             up["target"] = f"{owner}/{name}#{num}"      # what you asked about
             return up
 
-    comments = gh.comments(owner, name, num)
-    timeline = gh.timeline(owner, name, num)
+    comments, comments_cut = gh.comments(owner, name, num)
+    timeline, timeline_cut = gh.timeline(owner, name, num)
 
     author = (issue.get("user") or {}).get("login")
     bounty = find_bounty(issue, comments)
@@ -534,6 +553,11 @@ def analyse(owner: str, name: str, num: int, gh: GH, _via: str | None = None) ->
         "ineligible": scan_ineligible(comments),
         "awarded": scan_awarded(comments),
         "comment_count": len(comments),
+        # True when the 400-event cap cut the read short. Everything derived from the thread
+        # — comment_count, contenders, and every "days since" in `maintainer` — is then a
+        # bound computed on the OLDEST 400 events, not a measurement. Report it, do not
+        # quietly serve the number as though the thread ended there.
+        "truncated": bool(comments_cut or timeline_cut),
         "api_calls": gh.calls,
     }
     f["verdict"], f["advice"] = decide(f)

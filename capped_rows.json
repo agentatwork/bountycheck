@@ -1,0 +1,121 @@
+[
+ {
+  "target": "liubaining-louis/louis-os#77",
+  "verdict": "NO BOUNTY",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 2500,
+  "contenders_reported": 4
+ },
+ {
+  "target": "claude-builders-bounty/claude-builders-bounty#1",
+  "verdict": "STALE",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 2082,
+  "contenders_reported": 60
+ },
+ {
+  "target": "claude-builders-bounty/claude-builders-bounty#3",
+  "verdict": "STALE",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 1619,
+  "contenders_reported": 72
+ },
+ {
+  "target": "claude-builders-bounty/claude-builders-bounty#4",
+  "verdict": "STALE",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 1418,
+  "contenders_reported": 82
+ },
+ {
+  "target": "claude-builders-bounty/claude-builders-bounty#2",
+  "verdict": "STALE",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 1393,
+  "contenders_reported": 90
+ },
+ {
+  "target": "SecureBananaLabs/bug-bounty#743",
+  "verdict": "ABANDONED",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 1391,
+  "contenders_reported": 91
+ },
+ {
+  "target": "OmniBlocks/Boxy-gh#63",
+  "verdict": "NO BOUNTY",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 1168,
+  "contenders_reported": 1
+ },
+ {
+  "target": "chatmcp/mcpso#1",
+  "verdict": "NO BOUNTY",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 1164,
+  "contenders_reported": 1
+ },
+ {
+  "target": "claude-builders-bounty/claude-builders-bounty#5",
+  "verdict": "STALE",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 1080,
+  "contenders_reported": 89
+ },
+ {
+  "target": "auscaster/frantic-board#330",
+  "verdict": "UNVERIFIED",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 1012,
+  "contenders_reported": 1
+ },
+ {
+  "target": "auscaster/frantic-board#106",
+  "verdict": "UNVERIFIED",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 864,
+  "contenders_reported": 1
+ },
+ {
+  "target": "mergeos-bounties/mergeos#1",
+  "verdict": "STALE",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 772,
+  "contenders_reported": 6
+ },
+ {
+  "target": "mergeos-bounties/mergeos#64",
+  "verdict": "UNVERIFIED",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 676,
+  "contenders_reported": 20
+ },
+ {
+  "target": "microg/GmsCore#2994",
+  "verdict": "CONTESTED",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 651,
+  "contenders_reported": 5
+ },
+ {
+  "target": "Scottcjn/rustchain-bounties#728",
+  "verdict": "UNVERIFIED",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 557,
+  "contenders_reported": 1
+ },
+ {
+  "target": "Scottcjn/rustchain-bounties#71",
+  "verdict": "UNVERIFIED",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 505,
+  "contenders_reported": 3
+ },
+ {
+  "target": "SecureBananaLabs/bug-bounty#80",
+  "verdict": "ABANDONED",
+  "tool_read": 400,
+  "true_comments_2026_08_29": 451,
+  "contenders_reported": 224
+ }
+]

@@ -41,6 +41,10 @@ for path in sys.argv[1:]:
         recs.append(r)
 
 fetched = len(recs)
+# Rows whose comment/timeline read hit bountycheck's 400-event cap. `truncated` is written by
+# current versions; records captured before that field existed are recognised by the tell that
+# made the cap visible in the first place -- a comment_count of exactly 400, seventeen times.
+truncated = [r for r in recs if r.get("truncated") or r.get("comment_count") == 400]
 # The search that produced these targets included `/bounty` in comments, which sweeps in
 # ordinary issues where somebody typed the word once. Those are search artifacts, not
 # bounties, and counting them in the denominator would flatter the headline by making the
@@ -293,6 +297,13 @@ p("Records were gathered by `scan.py` and summarised by `make_dataset.py`; verdi
   "targets. Every verdict in this document was recomputed from stored fields rather than "
   "trusted as written at scan time.")
 p()
+p("**Verdicts are dated.** Several rules measure elapsed time — an issue is `STALE` once "
+  "maintainer silence crosses a threshold — so a verdict is a statement about the issue *and* "
+  "the day it was computed. Re-running `make_dataset.py` later moves rows without anything "
+  "about the issues having changed: recomputed on 29 August 2026, five `CONTESTED` issues had "
+  "become `STALE`. Every number above is as of the scan date, and `BOUNTYCHECK_NOW` pins the "
+  "clock so a dated report reproduces exactly.")
+p()
 p("**Sampling.** Targets came from GitHub issue search: bounty labels, bounty platform mentions "
   "in issue bodies, and `/bounty` in comments, sorted by both most-commented and "
   "most-recently-updated. That over-samples issues with long comment threads, which are exactly "
@@ -324,6 +335,34 @@ p()
 p(f"**Errors.** {errors} targets failed to fetch (deleted, made private, or renamed between "
   "search and fetch) and are excluded.")
 p()
+if truncated:
+    kept = [r for r in truncated if r in recs]
+    p(f"**Threads this scan did not read to the end — added 29 August 2026.** `bountycheck` "
+      f"reads at most 400 comments and 400 timeline events per issue. That cap is deliberate — "
+      f"a farmed issue can carry two thousand comments and reading all of them spends "
+      f"somebody else's rate limit for very little extra signal — but the original code "
+      f"returned a bare list, so a capped read looked exactly like a thread that ended. "
+      f"**{len(truncated)} of the {fetched} fetched issues hit it** "
+      f"({len(kept)} of them survive into the table above).")
+    p()
+    p("The direction matters. GitHub serves comments and timeline events **oldest first**, so "
+      "hitting the cap discards the *newest* events — which are the ones every recency verdict "
+      "here is computed from. For those issues, `comment_count` is not a count (it is exactly "
+      "400), `contenders` is a floor, and each `days since` in `maintainer` was measured over "
+      "the oldest 400 events rather than the whole thread.")
+    p()
+    p("What I checked rather than assumed: on 29 August 2026 the seventeen issues held 19,303 "
+      "comments between them, so the scan read about **35%** of the thread on those rows — and "
+      "less than that, since threads have grown in the two weeks since. For the six capped "
+      "issues verdicted `STALE`, I paged every comment past position 400 looking for a "
+      "maintainer: `OWNER`, `MEMBER` or `COLLABORATOR`. **There are none on any of the six.** "
+      "The recent traffic on all of them is claimants queueing, which is what `STALE` means, so "
+      "no verdict flips. The per-row counts are in `capped_rows.json`.")
+    p()
+    p("Current versions record a `truncated` boolean per issue and settle it with one extra "
+      "request, so a thread that is exactly 400 long is not reported as cut off. The rows in "
+      "`dataset.jsonl` predate that field.")
+    p()
 p("**Mirrors are resolved.** Directory repositories that mirror somebody else's issue — "
   "Ubiquity's devpool is the large one — are measured at the issue they point to, not at "
   "the listing. Measuring the listing reports an empty room: no claimants, no maintainer, "
@@ -341,7 +380,9 @@ p("```sh")
 p("export GITHUB_TOKEN=...")
 p("python3 scan.py targets.txt dataset.jsonl")
 p("PYTHONPATH=../trapcheck python3 make_trap.py dataset.jsonl > trap.json")
-p("python3 make_dataset.py dataset.jsonl > DATASET.md")
+p("# BOUNTYCHECK_NOW pins the elapsed-time rules to the scan date. Without it the verdicts")
+p("# are recomputed against today, and the report will not match the one committed here.")
+p("BOUNTYCHECK_NOW=2026-08-14T12:52:00 python3 make_dataset.py dataset.jsonl > DATASET.md")
 p("```")
 p()
 p("Raw records — one JSON object per issue, including every claimant, every competing pull "

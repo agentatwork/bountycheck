@@ -149,6 +149,8 @@ Several of these were created within the last few months and have issued thousan
 
 Records were gathered by `scan.py` and summarised by `make_dataset.py`; verdict rules are in `bountycheck.py` and the whole thing is reproducible from a GitHub token and a list of targets. Every verdict in this document was recomputed from stored fields rather than trusted as written at scan time.
 
+**Verdicts are dated.** Several rules measure elapsed time — an issue is `STALE` once maintainer silence crosses a threshold — so a verdict is a statement about the issue *and* the day it was computed. Re-running `make_dataset.py` later moves rows without anything about the issues having changed: recomputed on 29 August 2026, five `CONTESTED` issues had become `STALE`. Every number above is as of the scan date, and `BOUNTYCHECK_NOW` pins the clock so a dated report reproduces exactly.
+
 **Sampling.** Targets came from GitHub issue search: bounty labels, bounty platform mentions in issue bodies, and `/bounty` in comments, sorted by both most-commented and most-recently-updated. That over-samples issues with long comment threads, which are exactly the contested ones — so the reachable share here is, if anything, pessimistic against quiet-but-live bounties. It also cannot see bounties that are never posted publicly as GitHub issues, which is where a lot of the serious money actually is.
 
 **The denominator.** 74 fetched issues had no bounty on them and were dropped. Keeping them would have made the unreachable share of real bounties look smaller than it is, which is the flattering direction, so they are out. Issues that carry a bounty label but no discoverable amount are **kept** — they advertise a bounty, and whether that advertisement is backed by money is exactly what is in question. A bounty is counted wherever the amount was announced: a platform bot, a maintainer's `/bounty` command, the issue title (`[$250] ...`, Expensify's convention, paid via Upwork), or a price label (`Price: 300 USD`, Ubiquity's).
@@ -158,6 +160,14 @@ Records were gathered by `scan.py` and summarised by `make_dataset.py`; verdict 
 **The trapcheck column** was produced by running [trapcheck](https://github.com/agentatwork/trapcheck) over each repository behind an `OPEN`, `TAKEN` or `CONTESTED` issue — the repository, not the issue, so a `CLEAN` rating means the repo's public instruction files and task text carry none of the agent-farming patterns, not that any particular task is safe.
 
 **Errors.** 0 targets failed to fetch (deleted, made private, or renamed between search and fetch) and are excluded.
+
+**Threads this scan did not read to the end — added 29 August 2026.** `bountycheck` reads at most 400 comments and 400 timeline events per issue. That cap is deliberate — a farmed issue can carry two thousand comments and reading all of them spends somebody else's rate limit for very little extra signal — but the original code returned a bare list, so a capped read looked exactly like a thread that ended. **17 of the 489 fetched issues hit it** (12 of them survive into the table above).
+
+The direction matters. GitHub serves comments and timeline events **oldest first**, so hitting the cap discards the *newest* events — which are the ones every recency verdict here is computed from. For those issues, `comment_count` is not a count (it is exactly 400), `contenders` is a floor, and each `days since` in `maintainer` was measured over the oldest 400 events rather than the whole thread.
+
+What I checked rather than assumed: on 29 August 2026 the seventeen issues held 19,303 comments between them, so the scan read about **35%** of the thread on those rows — and less than that, since threads have grown in the two weeks since. For the six capped issues verdicted `STALE`, I paged every comment past position 400 looking for a maintainer: `OWNER`, `MEMBER` or `COLLABORATOR`. **There are none on any of the six.** The recent traffic on all of them is claimants queueing, which is what `STALE` means, so no verdict flips. The per-row counts are in `capped_rows.json`.
+
+Current versions record a `truncated` boolean per issue and settle it with one extra request, so a thread that is exactly 400 long is not reported as cut off. The rows in `dataset.jsonl` predate that field.
 
 **Mirrors are resolved.** Directory repositories that mirror somebody else's issue — Ubiquity's devpool is the large one — are measured at the issue they point to, not at the listing. Measuring the listing reports an empty room: no claimants, no maintainer, no eligibility rules, because none of those live in a directory entry. Four of the issues this sweep initially scored as reachable were mirrors, and all four resolve to tasks their own bot has publicly closed to outside contributors.
 
@@ -169,7 +179,9 @@ Records were gathered by `scan.py` and summarised by `make_dataset.py`; verdict 
 export GITHUB_TOKEN=...
 python3 scan.py targets.txt dataset.jsonl
 PYTHONPATH=../trapcheck python3 make_trap.py dataset.jsonl > trap.json
-python3 make_dataset.py dataset.jsonl > DATASET.md
+# BOUNTYCHECK_NOW pins the elapsed-time rules to the scan date. Without it the verdicts
+# are recomputed against today, and the report will not match the one committed here.
+BOUNTYCHECK_NOW=2026-08-14T12:52:00 python3 make_dataset.py dataset.jsonl > DATASET.md
 ```
 
 Raw records — one JSON object per issue, including every claimant, every competing pull request, and the maintainer timing — are in `dataset.jsonl` in this repository.

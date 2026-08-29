@@ -46,14 +46,19 @@ def xref(number, author, state="open", merged=False, days=10, repo="o/r"):
         "created_at": ago(days)}}}
 
 
-def run(iss, comments, timeline=()):
-    """analyse() without the network - same assembly, fixtures instead of HTTP."""
+def run(iss, comments, timeline=(), cut=False):
+    """analyse() without the network - same assembly, fixtures instead of HTTP.
+
+    The fake returns the same `(items, truncated)` shape as the real client. If it did not,
+    the fixture would keep passing while the live path returned something else, and the drift
+    would sit on precisely the branch no test reaches.
+    """
     class FakeGH(bc.GH):
         def __init__(self):
             self.calls = 0
         def issue(self, o, n, num): return iss
-        def comments(self, o, n, num): return list(comments)
-        def timeline(self, o, n, num): return list(timeline)
+        def comments(self, o, n, num): return list(comments), cut
+        def timeline(self, o, n, num): return list(timeline), False
     return bc.analyse("o", "r", 1, FakeGH())
 
 
@@ -315,5 +320,65 @@ check("a quoted coin is flagged as quoted", (f["bounty"]["scrip"], f["bounty"]["
       ("5 SOL", True))
 f = run(issue(title="[300 USD] Port the parser", labels=[{"name": "bounty"}]), [])
 check("dollars in a title are not scrip", f["bounty"]["scrip"], None)
+
+
+# --------------------------------------------------------------------------------------
+print("page cap")
+# The 400-event cap used to return a bare list, which reads identically to a thread that
+# really ended. GitHub serves comments oldest-first, so hitting the cap throws away the
+# NEWEST events -- the ones every recency verdict is computed from. 17 of the 489 issues in
+# the published dataset hit it. These four cases pin the flag to the reason it was set.
+f = run(issue(title="[$20] Fix it", labels=[{"name": "bounty"}]), [])
+check("a thread that ended is not truncated", f["truncated"], False)
+f = run(issue(title="[$20] Fix it", labels=[{"name": "bounty"}]), [], cut=True)
+check("a capped thread is reported truncated", f["truncated"], True)
+
+
+class _Stub(bc.GH):
+    """Serves `n` items 100 at a time, so _paged meets a real end or a real cap."""
+    def __init__(self, n):
+        self.calls, self.n = 0, n
+
+    def _get(self, url):
+        page = int(url.split("page=")[-1])
+        per = 1 if "per_page=1&" in url else 100
+        lo = (page - 1) * per
+        return [{"i": i} for i in range(lo, min(lo + per, self.n))]
+
+
+items, cut = _Stub(250)._paged("https://x/y")
+check("short page ends the read, not the cap", (len(items), cut), (250, False))
+items, cut = _Stub(400)._paged("https://x/y")
+# Exactly-at-cap is the case a naive `len(out) == cap` flag gets wrong: the read stopped at
+# the cap, but there was nothing behind it. The probe request is what tells the difference.
+check("exactly cap items is not truncated", (len(items), cut), (400, False))
+items, cut = _Stub(2082)._paged("https://x/y")
+check("more behind the cap is truncated", (len(items), cut), (400, True))
+
+
+print("\ndated verdicts")
+# Several rules measure elapsed time, so a verdict is a claim about the issue AND the day it
+# was computed. Regenerating DATASET.md two weeks after the scan silently restated five
+# CONTESTED issues as STALE. NOW is read at import, so this has to be a fresh interpreter.
+import os  # noqa: E402
+import subprocess  # noqa: E402
+
+
+def _days_at(pin, iso):
+    src = f"import bountycheck as b; print(b._days({iso!r}))"
+    env = dict(os.environ, BOUNTYCHECK_NOW=pin, PYTHONPATH=os.path.dirname(os.path.abspath(__file__)))
+    return subprocess.run([sys.executable, "-c", src], capture_output=True, text=True,
+                          env=env).stdout.strip()
+
+
+STORED = "2026-08-04T12:00:00Z"
+# Two pins, one stored field, two answers. Both are plain arithmetic, so neither depends on the
+# day this suite is run -- a pin close to today would pass by coincidence and fail tomorrow.
+check("the clock pin is honoured", _days_at("2026-08-14T12:00:00", STORED), "10")
+check("a different pin moves the age", _days_at("2026-11-14T12:00:00", STORED), "102")
+# And without a pin the default really is the wall clock, which is the behaviour that made a
+# regenerated report restate five verdicts.
+check("unpinned falls back to today", _days_at("", STORED),
+      str((datetime.now(timezone.utc) - datetime.fromisoformat(STORED.replace("Z", "+00:00"))).days))
 
 print(f"\n{PASS} passed, {FAIL} failed")
